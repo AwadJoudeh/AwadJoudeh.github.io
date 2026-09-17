@@ -1,0 +1,608 @@
+<title>Awad Joudeh</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  :root{
+    --bg:#eef0e8;
+    --surface:#f8f9f3;
+    --surface-2:#e3e6d9;
+    --border:#d2d6c6;
+    --border-strong:#b7bda8;
+    --ink:#1b2430;
+    --ink-muted:#555f6a;
+    --ink-subtle:#828b82;
+    --accent:#1f4287;
+    --accent-hover:#16326a;
+    --accent-contrast:#ffffff;
+    --accent-soft:#dde5f1;
+    --stamp:#a3462b;
+    --stamp-soft:#f1ded5;
+
+    --font-display:'Fraunces', Georgia, 'Times New Roman', serif;
+    --font-body:'Public Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-mono:'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+
+    --space-1:.5rem; --space-2:1rem; --space-3:1.5rem; --space-4:2.25rem;
+    --space-5:3.25rem; --space-6:4.5rem; --space-7:6.5rem;
+
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#12161c; --surface:#171c23; --surface-2:#1e252d;
+      --border:#2a323c; --border-strong:#3a4451;
+      --ink:#e8e7dd; --ink-muted:#aab2ba; --ink-subtle:#7c8790;
+      --accent:#7ba1de; --accent-hover:#9ab6e6; --accent-contrast:#0d1116;
+      --accent-soft:#213248;
+      --stamp:#d98a67; --stamp-soft:#3a2620;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#12161c; --surface:#171c23; --surface-2:#1e252d;
+    --border:#2a323c; --border-strong:#3a4451;
+    --ink:#e8e7dd; --ink-muted:#aab2ba; --ink-subtle:#7c8790;
+    --accent:#7ba1de; --accent-hover:#9ab6e6; --accent-contrast:#0d1116;
+    --accent-soft:#213248;
+    --stamp:#d98a67; --stamp-soft:#3a2620;
+    color-scheme: dark;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} }
+
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--font-body);
+    font-size:16px;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  a{ color:var(--accent); }
+  ::selection{ background:var(--accent-soft); }
+
+  .wrap{
+    max-width:56rem;
+    margin:0 auto;
+    padding-inline:clamp(1.25rem, 4vw, 2.5rem);
+  }
+
+  h1,h2,h3{ font-family:var(--font-display); font-weight:600; text-wrap:balance; margin:0; }
+  h2{ font-size:clamp(1.6rem, 2.2vw + 1rem, 2.1rem); }
+  h3{ font-size:1.15rem; font-weight:600; }
+
+  .eyebrow{
+    font-family:var(--font-mono);
+    font-size:.72rem;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--ink-subtle);
+  }
+
+  /* ---------- header ---------- */
+  .site-header{
+    position:sticky; top:env(safe-area-inset-top, 0px);
+    z-index:20;
+    background:color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--border);
+  }
+  .site-header .wrap{
+    display:flex; align-items:center; justify-content:space-between;
+    padding-block:.9rem;
+    max-width:64rem;
+  }
+  .mark{
+    font-family:var(--font-mono);
+    font-weight:500;
+    font-size:.95rem;
+    letter-spacing:.02em;
+    color:var(--ink);
+    text-decoration:none;
+  }
+  .mark span{ color:var(--accent); }
+  nav.primary-nav{ display:flex; gap:var(--space-4); }
+  nav.primary-nav a{
+    font-family:var(--font-mono);
+    font-size:.8rem;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--ink-muted);
+    text-decoration:none;
+    padding-block:.25rem;
+    border-bottom:1px solid transparent;
+    transition:color .15s ease, border-color .15s ease;
+  }
+  nav.primary-nav a:hover{ color:var(--ink); border-color:var(--accent); }
+  .nav-toggle{ display:none; }
+
+  /* ---------- hero ---------- */
+  .hero{ position:relative; overflow:hidden; }
+  .hero .wrap{ max-width:64rem; }
+  .hero-inner{
+    position:relative; z-index:1;
+    padding-block:var(--space-6) var(--space-5);
+    display:grid; gap:var(--space-4);
+  }
+  .hero-scatter{
+    position:absolute; top:0; right:0;
+    width:min(48%, 26rem); height:100%;
+    opacity:.55;
+    pointer-events:none;
+  }
+  :root[data-theme="dark"] .hero-scatter, @media (prefers-color-scheme: dark){ .hero-scatter{ opacity:.4; } }
+  .hero h1{
+    font-size:clamp(2.6rem, 4vw + 1.4rem, 4.1rem);
+    line-height:1.02;
+    max-width:14ch;
+  }
+  .role-line{
+    font-family:var(--font-mono);
+    font-size:clamp(.95rem, .4vw + .85rem, 1.05rem);
+    color:var(--accent);
+    margin-top:.6rem;
+  }
+  .lede{
+    max-width:60ch;
+    color:var(--ink-muted);
+    font-size:1.05rem;
+  }
+  .meta-block{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(13rem, 1fr));
+    gap:.9rem 2rem;
+    padding:var(--space-3);
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:2px;
+    font-family:var(--font-mono);
+    font-size:.85rem;
+    max-width:38rem;
+  }
+  .meta-block dt{ color:var(--ink-subtle); font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; }
+  .meta-block dd{ margin:.2rem 0 0; color:var(--ink); }
+
+  .cta-row{ display:flex; gap:var(--space-2); flex-wrap:wrap; }
+  .btn{
+    font-family:var(--font-mono);
+    font-size:.85rem;
+    letter-spacing:.03em;
+    text-decoration:none;
+    padding:.7rem 1.3rem;
+    border-radius:2px;
+    border:1px solid var(--border-strong);
+    transition:transform .12s ease, background .15s ease, color .15s ease;
+  }
+  .btn-primary{ background:var(--accent); color:var(--accent-contrast); border-color:var(--accent); }
+  .btn-primary:hover{ background:var(--accent-hover); border-color:var(--accent-hover); }
+  .btn-ghost{ color:var(--ink); }
+  .btn-ghost:hover{ border-color:var(--ink); }
+  .btn:hover{ transform:translateY(-1px); }
+
+  /* ---------- sections ---------- */
+  section{ padding-block:var(--space-6); border-top:1px solid var(--border); }
+  section:first-of-type{ border-top:none; }
+  .section-head{
+    display:flex; align-items:baseline; justify-content:space-between; gap:1rem;
+    margin-bottom:var(--space-4);
+  }
+  .section-head .count{ font-family:var(--font-mono); font-size:.8rem; color:var(--ink-subtle); }
+
+  /* ---------- experience ledger ---------- */
+  .ledger{ display:grid; gap:0; }
+  .ledger-row{
+    display:grid;
+    grid-template-columns:9.5rem 1fr;
+    gap:var(--space-3);
+    padding-block:var(--space-3);
+    border-top:1px solid var(--border);
+  }
+  .ledger-row:first-child{ border-top:none; }
+  .ledger-date{
+    font-family:var(--font-mono);
+    font-size:.78rem;
+    color:var(--ink-subtle);
+    padding-top:.2rem;
+    white-space:nowrap;
+  }
+  .ledger-body h3{ margin-bottom:.15rem; }
+  .org-line{ font-size:.9rem; color:var(--ink-muted); margin-bottom:.75rem; }
+  .org-line b{ color:var(--ink); font-weight:600; }
+  ul.bullets{ margin:0; padding-left:1.1rem; display:grid; gap:.4rem; }
+  ul.bullets li{ color:var(--ink-muted); font-size:.95rem; }
+  ul.bullets li::marker{ color:var(--accent); }
+  ul.bullets li b{ color: var(--ink); font-weight: 600; }
+
+  /* ---------- project dossiers ---------- */
+  .dossier{
+    position:relative;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:2px;
+    padding:var(--space-3) var(--space-4);
+    margin-bottom:var(--space-3);
+  }
+  .dossier:last-child{ margin-bottom:0; }
+  .dossier-head{
+    display:flex; justify-content:space-between; align-items:flex-start; gap:1rem;
+    flex-wrap:wrap;
+    margin-bottom:.3rem;
+  }
+  .dossier-date{ font-family:var(--font-mono); font-size:.78rem; color:var(--ink-subtle); white-space:nowrap; }
+  .stack-tags{ display:flex; flex-wrap:wrap; gap:.4rem; margin:.7rem 0 1rem; }
+  .stack-tags span{
+    font-family:var(--font-mono);
+    font-size:.72rem;
+    color:var(--ink-muted);
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    padding:.2rem .55rem;
+    border-radius:2px;
+  }
+  .stamp{
+    position:absolute; top:1.1rem; right:1.4rem;
+    width:5.4rem; height:5.4rem;
+    border-radius:50%;
+    border:2px solid var(--stamp);
+    outline:1px solid var(--stamp);
+    outline-offset:3px;
+    color:var(--stamp);
+    display:flex; align-items:center; justify-content:center;
+    text-align:center;
+    transform:rotate(-9deg);
+    font-family:var(--font-mono);
+    font-size:.62rem;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    line-height:1.15;
+    background:var(--stamp-soft);
+    mix-blend-mode:multiply;
+  }
+  :root[data-theme="dark"] .stamp, @media (prefers-color-scheme: dark){ .stamp{ mix-blend-mode:normal; } }
+
+  /* ---------- skills ---------- */
+  .skills-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(15rem, 1fr));
+    gap:var(--space-3);
+  }
+  .skill-card{
+    border-top:2px solid var(--accent);
+    padding-top:.8rem;
+  }
+  .skill-card h3{ font-family:var(--font-mono); font-size:.78rem; letter-spacing:.06em; text-transform:uppercase; font-weight:600; color:var(--ink-muted); margin-bottom:.6rem; }
+  .skill-card ul{ list-style:none; margin:0; padding:0; display:grid; gap:.3rem; }
+  .skill-card li{ font-size:.92rem; }
+
+  /* ---------- education / certs ---------- */
+  .two-col{ display:grid; grid-template-columns:1fr 1fr; gap:var(--space-5); }
+  .two-col h3{ margin-bottom:.5rem; }
+  .field-row{ display:flex; justify-content:space-between; gap:1rem; padding-block:.4rem; border-top:1px solid var(--border); font-size:.92rem; }
+  .field-row:first-of-type{ border-top:none; }
+  .field-row .k{ color:var(--ink-muted); }
+  .field-row .v{ text-align:right; color:var(--ink); }
+
+  /* ---------- contact / footer ---------- */
+  .contact-inner{ display:grid; gap:var(--space-3); max-width:40rem; }
+  .contact-rows{ display:grid; gap:.55rem; font-family:var(--font-mono); font-size:.92rem; }
+  .contact-rows a{ color:var(--ink); text-decoration:none; border-bottom:1px solid var(--border-strong); }
+  .contact-rows a:hover{ color:var(--accent); border-color:var(--accent); }
+  footer{
+    padding-block:var(--space-3) calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
+    border-top:1px solid var(--border);
+    font-family:var(--font-mono);
+    font-size:.75rem;
+    color:var(--ink-subtle);
+  }
+  footer .wrap{ display:flex; justify-content:space-between; flex-wrap:wrap; gap:.5rem; }
+
+  @media (max-width: 640px){
+    nav.primary-nav{
+      position:fixed; inset:0 0 0 auto; top:calc(3.4rem + env(safe-area-inset-top,0px));
+      width:min(15rem, 70vw); height:auto;
+      background:var(--surface); border-left:1px solid var(--border);
+      flex-direction:column; padding:var(--space-3); gap:var(--space-2);
+      transform:translateX(105%); transition:transform .2s ease;
+    }
+    nav.primary-nav.open{ transform:translateX(0); }
+    .nav-toggle{
+      display:inline-flex; align-items:center; justify-content:center;
+      width:2.1rem; height:2.1rem;
+      border:1px solid var(--border-strong); background:none; border-radius:2px;
+      color:var(--ink); cursor:pointer; font-family:var(--font-mono);
+    }
+    .ledger-row{ grid-template-columns:1fr; gap:.3rem; }
+    .two-col{ grid-template-columns:1fr; }
+    .hero-scatter{ width:70%; opacity:.3; }
+    .stamp{ position:static; margin:.6rem 0 1rem; transform:rotate(-6deg); }
+    .dossier-head{ flex-direction:column; }
+  }
+</style>
+
+<header class="site-header">
+  <div class="wrap">
+    <a class="mark" href="#home">AWAD<span>·</span>JOUDEH</a>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">≡</button>
+    <nav class="primary-nav" id="primaryNav">
+      <a href="#experience">Experience</a>
+      <a href="#work">Work</a>
+      <a href="#skills">Skills</a>
+      <a href="#education">Education</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section id="home" class="hero">
+    <svg class="hero-scatter" viewBox="0 0 400 520" fill="none" aria-hidden="true">
+      <g stroke="var(--accent)" stroke-width="1">
+        <line x1="70" y1="90" x2="150" y2="150" opacity=".5"/>
+        <line x1="150" y1="150" x2="140" y2="240" opacity=".35"/>
+        <line x1="150" y1="150" x2="260" y2="130" opacity=".4"/>
+        <line x1="260" y1="130" x2="320" y2="210" opacity=".3"/>
+        <line x1="140" y1="240" x2="220" y2="320" opacity=".3"/>
+        <line x1="220" y1="320" x2="180" y2="410" opacity=".35"/>
+        <line x1="220" y1="320" x2="310" y2="360" opacity=".3"/>
+      </g>
+      <g fill="var(--accent)">
+        <circle cx="70" cy="90" r="3.5"/>
+        <circle cx="150" cy="150" r="5"/>
+        <circle cx="260" cy="130" r="3"/>
+        <circle cx="320" cy="210" r="3.5"/>
+        <circle cx="140" cy="240" r="4"/>
+        <circle cx="220" cy="320" r="5.5"/>
+        <circle cx="180" cy="410" r="3"/>
+        <circle cx="310" cy="360" r="3.5"/>
+        <circle cx="60" cy="330" r="2.5" opacity=".6"/>
+        <circle cx="350" cy="290" r="2.5" opacity=".6"/>
+        <circle cx="100" cy="460" r="2.5" opacity=".6"/>
+        <circle cx="290" cy="70" r="2.5" opacity=".6"/>
+      </g>
+    </svg>
+    <div class="wrap">
+      <div class="hero-inner">
+        <div>
+          <p class="eyebrow">Dossier / AI Engineer</p>
+          <h1>Awad Joudeh</h1>
+          <p class="role-line">RAG systems &amp; document intelligence, built to ship</p>
+        </div>
+        <p class="lede">AI Engineer specializing in production-grade intelligent systems — from LLM-powered email automation to embeddable AI chatbots and regulatory compliance checking. I work across RAG pipelines, agentic architectures, and multi-tenant SaaS design, turning dense unstructured documents into structured, verifiable data.</p>
+        <dl class="meta-block">
+          <div><dt>Location</dt><dd>Amman, Jordan</dd></div>
+          <div><dt>Focus</dt><dd>RAG · Agentic Systems · Doc Intelligence</dd></div>
+          <div><dt>Currently</dt><dd>AI Engineer @ Sengabi</dd></div>
+          <div><dt>Languages</dt><dd>Arabic (native), English</dd></div>
+        </dl>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="#work">View work</a>
+          <a class="btn btn-ghost" href="mailto:awadjoda5@gmail.com">Email me</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="experience">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Experience</h2>
+        <span class="count">02 entries</span>
+      </div>
+      <div class="ledger">
+        <div class="ledger-row">
+          <div class="ledger-date">09/2025 — Present</div>
+          <div class="ledger-body">
+            <h3>AI Engineer</h3>
+            <p class="org-line"><b>Sengabi</b> · Amman, Jordan</p>
+            <ul class="bullets">
+              <li>Designed and shipped two production AI products: an end-to-end Email Automation Agent and an embeddable AI Chatbot platform</li>
+              <li>Built multi-tenant SaaS architecture with RAG pipelines, LLM integration, and vector search using Qdrant</li>
+              <li>Deployed containerized applications with Docker, serving real clients across multiple channels</li>
+              <li>Integrated Gmail and Outlook via OAuth and delivered a fully embeddable chatbot widget for client websites</li>
+              <li>Mentored and technically supervised trainees, guiding and reviewing development of RAG pipelines, human-in-the-loop workflows, and backend fundamentals across independent trainee projects</li>
+            </ul>
+          </div>
+        </div>
+        <div class="ledger-row">
+          <div class="ledger-date">07/2024 — 08/2024</div>
+          <div class="ledger-body">
+            <h3>Internship</h3>
+            <p class="org-line"><b>Logatta</b> · Amman, Jordan</p>
+            <ul class="bullets">
+              <li>Developed backend web apps using Django</li>
+              <li>Managed databases and admin interfaces</li>
+              <li>Collaborated with developers to integrate machine learning models</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="work">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Selected work</h2>
+        <span class="count">05 entries</span>
+      </div>
+
+      <article class="dossier">
+        <div class="stamp">Verified<br>Citations</div>
+        <div class="dossier-head">
+          <h3>ComplianceAI</h3>
+          <span class="dossier-date">08/2026 — Present</span>
+        </div>
+        <div class="stack-tags"><span>FastAPI</span><span>PostgreSQL</span><span>Qdrant</span><span>Azure AI Document Intelligence</span><span>OpenAI</span></div>
+        <ul class="bullets">
+          <li>Built a real-time compliance checker that verifies policy drafts against Central Bank of Jordan circulars, citing the specific rule each clause agrees or conflicts with</li>
+          <li>Designed a deontic-logic rule schema (obligation/permission/prohibition, addressee, guard) to represent regulations as atomic, queryable rules instead of raw article text</li>
+          <li>Built a multi-format ingestion pipeline (PDF/DOCX/Markdown/JSON/ZIP) with Azure AI Document Intelligence for Arabic OCR and LLM-based structuring</li>
+          <li>Implemented Qdrant vector retrieval (multilingual-e5-small) with GPT-4o-mini for citation-backed verification</li>
+          <li>Empirically validated the retrieval design — chunking, embeddings, architecture — against a real regulatory corpus before building</li>
+          <li>Shipped a full drafting workflow: draft editor, translation hub, and multi-stage approval with version history</li>
+        </ul>
+      </article>
+
+      <article class="dossier">
+        <div class="dossier-head">
+          <h3>Global Career Matrix</h3>
+          <span class="dossier-date">07/2026 — Present</span>
+        </div>
+        <div class="stack-tags"><span>FastAPI</span><span>PostgreSQL</span><span>Alembic</span><span>JavaScript</span></div>
+        <ul class="bullets">
+          <li>Built a data-driven career and academic counseling platform for Tawjihi students and fresh graduates, cross-referencing global job-market demand, AI automation risk, and regional data</li>
+          <li>Designed and seeded a 169-major taxonomy with per-country demand, university admission cutoffs/fees, and citation-backed sourcing, served via a versioned REST API</li>
+          <li>Implemented a 60-item RIASEC psychometric instrument (career-interest profiler) integrated into the recommendation flow</li>
+          <li>Containerized the full stack with Docker Compose for one-command setup</li>
+        </ul>
+      </article>
+
+      <article class="dossier">
+        <div class="dossier-head">
+          <h3>AI Chatbot Platform</h3>
+          <span class="dossier-date">11/2025 — Present</span>
+        </div>
+        <div class="stack-tags"><span>Qdrant</span><span>MongoDB</span><span>OpenRouter</span><span>Redis</span></div>
+        <ul class="bullets">
+          <li>Engineered a fully embeddable AI chatbot (iframe/JS widget) with customizable profiles, appearance, and welcome flows</li>
+          <li>Built a RAG-powered message pipeline combining Qdrant vector search, MongoDB conversation history, and LLM calls via OpenRouter</li>
+          <li>Implemented a journey/flow system for configurable multi-step conversation paths and plug-and-play tool integrations</li>
+          <li>Supported 176 languages via automatic detection with per-response language adaptation</li>
+          <li>Integrated TTS/voice support with Redis caching for low-latency audio responses</li>
+        </ul>
+      </article>
+
+      <article class="dossier">
+        <div class="dossier-head">
+          <h3>AI Email Agent</h3>
+          <span class="dossier-date">09/2025 — 11/2025</span>
+        </div>
+        <div class="stack-tags"><span>FastAPI</span><span>PostgreSQL</span><span>OpenAI</span><span>Azure AI</span></div>
+        <ul class="bullets">
+          <li>Architected full-stack intelligent email processing platform with hierarchical AI classification and multi-tenant support</li>
+          <li>Implemented RAG-enhanced response generation using Qdrant vector database for context-aware suggestions</li>
+          <li>Integrated multi-channel OAuth authentication (Gmail, Outlook) with automatic token management</li>
+          <li>Built 40+ microservices for email automation, spam detection, and policy enforcement across a schema of 25+ models</li>
+          <li>Deployed containerized application with Docker, health checks, and comprehensive audit logging</li>
+        </ul>
+      </article>
+
+      <article class="dossier">
+        <div class="dossier-head">
+          <h3>Smart Traffic Management System <span style="font-weight:400;color:var(--ink-muted);">— Graduation Project</span></h3>
+          <span class="dossier-date">10/2024 — 05/2025</span>
+        </div>
+        <div class="stack-tags"><span>YOLOv11</span><span>TensorFlow</span><span>OpenCV</span><span>Flask</span></div>
+        <ul class="bullets">
+          <li>Designed an AI-driven system for smart traffic light control based on vehicle type detection and audio recognition</li>
+          <li>Trained a siren-detection model using YAMNet to prioritize emergency vehicles</li>
+          <li>Achieved real-time traffic-density analysis and dynamic control using combined visual and audio inputs</li>
+          <li>Built a Flask web interface to simulate and interact with the system</li>
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <section id="skills">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Skills index</h2>
+      </div>
+      <div class="skills-grid">
+        <div class="skill-card">
+          <h3>Artificial Intelligence</h3>
+          <ul><li>LLMs &amp; Agentic RAG</li><li>LangChain</li><li>Supervised &amp; Unsupervised Learning</li><li>OpenRouter</li><li>Azure AI (Doc. Intelligence &amp; OCR)</li></ul>
+        </div>
+        <div class="skill-card">
+          <h3>Backend &amp; APIs</h3>
+          <ul><li>FastAPI</li><li>Django</li><li>Flask</li><li>REST API Design</li><li>OAuth (Gmail, Outlook)</li></ul>
+        </div>
+        <div class="skill-card">
+          <h3>Databases</h3>
+          <ul><li>PostgreSQL</li><li>MySQL</li><li>MongoDB</li><li>Qdrant</li><li>Redis</li></ul>
+        </div>
+        <div class="skill-card">
+          <h3>Deployment &amp; MLOps</h3>
+          <ul><li>Docker</li><li>Containerization &amp; Image Builds</li><li>Model Versioning &amp; Monitoring</li></ul>
+        </div>
+        <div class="skill-card">
+          <h3>Data Engineering</h3>
+          <ul><li>Airflow</li><li>Automated Python Scrapers</li><li>Git</li></ul>
+        </div>
+        <div class="skill-card">
+          <h3>Programming</h3>
+          <ul><li>Python</li><li>SQL</li><li>JavaScript</li></ul>
+        </div>
+        <div class="skill-card">
+          <h3>Quality Assurance</h3>
+          <ul><li>Testing &amp; validation of AI pipelines</li><li>RAG system evaluation</li><li>Multi-tenant SaaS performance</li></ul>
+        </div>
+        <div class="skill-card">
+          <h3>Mentorship</h3>
+          <ul><li>Trainee supervision</li><li>Code &amp; architecture review</li><li>RAG / backend guidance</li></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="education">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Education &amp; certifications</h2>
+      </div>
+      <div class="two-col">
+        <div>
+          <h3>Education</h3>
+          <div class="field-row"><span class="k">B.Sc. Data Science &amp; AI</span><span class="v">2021 – 2025</span></div>
+          <div class="field-row"><span class="k">Hashemite University</span><span class="v">Jordan</span></div>
+        </div>
+        <div>
+          <h3>Certifications</h3>
+          <div class="field-row"><span class="k">Machine Learning</span><span class="v">Zain Zinc</span></div>
+          <div class="field-row"><span class="k">Artificial Intelligence</span><span class="v">TAG.Global</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Get in touch</h2>
+      </div>
+      <div class="contact-inner">
+        <p class="lede">Open to conversations about RAG systems, document intelligence, and applied AI engineering roles. The fastest way to reach me is email.</p>
+        <div class="contact-rows">
+          <div>Email — <a href="mailto:awadjoda5@gmail.com">awadjoda5@gmail.com</a></div>
+          <div>Phone — <a href="tel:+962789431221">+962 78 943 1221</a></div>
+          <div>Location — Amman, Jordan</div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>© <span id="year"></span> Awad Joudeh</span>
+    <span>Built with FastAPI, RAG pipelines &amp; a lot of Docker</span>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+  const toggle = document.getElementById('navToggle');
+  const nav = document.getElementById('primaryNav');
+  toggle.addEventListener('click', () => {
+    const open = nav.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', String(open));
+  });
+  nav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+    nav.classList.remove('open');
+    toggle.setAttribute('aria-expanded', 'false');
+  }));
+</script>
