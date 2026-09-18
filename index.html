@@ -160,7 +160,9 @@
   .nav-toggle{ display:none; }
 
   /* ---------- page router ---------- */
-  .page{ padding-block:var(--space-5) var(--space-6); }
+  .page{ position:relative; overflow:hidden; padding-block:var(--space-5) var(--space-6); }
+  /* Every page carries the same scatter field, so content needs its own layer. */
+  .page > .wrap{ position:relative; z-index:1; }
   .js .page{ display:none; }
   .js .page.is-active{ display:block; animation:pageIn .34s cubic-bezier(.22,.61,.36,1) both; }
   @keyframes pageIn{ from{ opacity:0; transform:translateY(12px); } to{ opacity:1; transform:none; } }
@@ -180,10 +182,10 @@
   .page-sub{ margin:0; color:var(--ink-muted); max-width:64ch; font-size:.98rem; }
 
   /* ---------- hero (home) ---------- */
-  #home{ position:relative; overflow:hidden; padding-block:var(--space-6) var(--space-5); }
+  #home{ padding-block:var(--space-6) var(--space-5); }
   .hero-inner{ position:relative; z-index:1; display:grid; gap:var(--space-4); }
   .hero-scatter{
-    position:absolute; top:0; right:0;
+    position:absolute; top:0; right:0; z-index:0;
     width:min(46%, 26rem); height:100%;
     opacity:.4;
     pointer-events:none;
@@ -250,6 +252,11 @@
   .btn-primary:hover{ background:var(--accent-hover); border-color:var(--accent-hover); }
   .btn-ghost{ color:var(--ink); }
   .btn-ghost:hover{ border-color:var(--ink); }
+  /* pill shape, matched to .arrow-fill-btn / .btn-glow so CTA rows line up */
+  .btn-pill{
+    display:inline-flex; align-items:center; justify-content:center;
+    height:2.9rem; padding:0 1.4rem; border-radius:999px;
+  }
   .btn:hover{ transform:translateY(-1px); }
 
   /* ---------- glow button ---------- */
@@ -409,6 +416,7 @@
   @media (max-width: 700px){
     .arrow-fill-btn{ --afb-h:3.1rem; --afb-pad:1.5rem; --afb-circle:2.4rem; }
     .btn-glow{ height:3.1rem; padding:0 1.5rem; }
+    .btn-pill{ height:3.1rem; padding:0 1.5rem; }
   }
 
   @media (prefers-reduced-motion: reduce){
@@ -571,22 +579,141 @@
   /* ---------- skills ---------- */
   .skills-grid{
     display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(14rem, 1fr));
-    gap:var(--space-3) var(--space-4);
+    grid-template-columns:repeat(3, minmax(0, 1fr));
+    /* cards hug their own content instead of stretching to the tallest in the row */
+    align-items:start;
+    gap:var(--space-2);
   }
-  .skill-card{ border-top:2px solid var(--accent); padding-top:.8rem; }
+  .skill-card{
+    display:grid; align-content:start; gap:.85rem;
+    padding:var(--space-3);
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-top:2px solid var(--accent);
+    border-radius:3px;
+    transition:border-color .2s ease, box-shadow .3s ease;
+  }
+  .skill-card:hover{
+    border-color:var(--border-strong);
+    border-top-color:var(--accent);
+    box-shadow:0 18px 40px -26px color-mix(in srgb, var(--ink) 55%, transparent);
+  }
+  /* the core domain leads the grid at double width */
+  .skill-card.is-lead{ grid-column:span 2; background:var(--surface-2); }
+
+  .skill-head{ display:flex; align-items:baseline; gap:.6rem; }
+  .skill-head .sk-n{
+    font-family:var(--font-mono); font-size:.7rem;
+    letter-spacing:.12em; color:var(--accent);
+  }
   .skill-card h3{
     font-family:var(--font-mono); font-size:.76rem; letter-spacing:.06em;
-    text-transform:uppercase; font-weight:600; color:var(--ink-muted); margin-bottom:.6rem;
+    text-transform:uppercase; font-weight:600; color:var(--ink-muted); margin:0;
   }
-  .skill-card ul{ list-style:none; margin:0; padding:0; display:grid; gap:.3rem; }
-  .skill-card li{ font-size:.92rem; }
+  .skill-head .sk-count{
+    margin-inline-start:auto;
+    font-family:var(--font-mono); font-size:.7rem; color:var(--ink-subtle);
+  }
+  .skill-card ul{
+    list-style:none; margin:0; padding:0;
+    display:flex; flex-wrap:wrap; gap:.4rem;
+  }
+  .skill-card li{
+    font-family:var(--font-mono);
+    font-size:.74rem;
+    line-height:1.4;
+    color:var(--ink-muted);
+    background:var(--bg);
+    border:1px solid var(--border);
+    padding:.28rem .6rem;
+    border-radius:2px;
+    transition:color .15s ease, border-color .15s ease;
+  }
+  .skill-card li:hover{ color:var(--ink); border-color:var(--border-strong); }
 
   /* ---------- contact ---------- */
-  .contact-inner{ display:grid; gap:var(--space-3); max-width:42rem; }
-  .contact-rows{ display:grid; gap:.55rem; font-family:var(--font-mono); font-size:.92rem; }
-  .contact-rows a{ color:var(--ink); text-decoration:none; border-bottom:1px solid var(--border-strong); }
-  .contact-rows a:hover{ color:var(--accent); border-color:var(--accent); }
+  .contact-grid{
+    display:grid;
+    grid-template-columns:minmax(0, 1.05fr) minmax(0, .95fr);
+    gap:var(--space-4) var(--space-5);
+    align-items:start;
+  }
+  .contact-main{ display:grid; gap:var(--space-3); align-content:start; }
+  .status-chip{
+    display:inline-flex; align-items:center; gap:.55rem;
+    justify-self:start;
+    margin:0;
+    font-family:var(--font-mono);
+    font-size:.72rem;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--ink-muted);
+    background:var(--surface);
+    border:1px solid var(--border);
+    padding:.35rem .8rem;
+    border-radius:999px;
+  }
+  .status-dot{
+    width:.45rem; height:.45rem; border-radius:50%;
+    background:var(--accent);
+    box-shadow:0 0 0 0 color-mix(in srgb, var(--accent) 55%, transparent);
+    animation:statusPulse 2.6s ease-out infinite;
+  }
+  @keyframes statusPulse{ to{ box-shadow:0 0 0 .55rem color-mix(in srgb, var(--accent) 0%, transparent); } }
+  .contact-lede{ margin:0; max-width:46ch; color:var(--ink-muted); font-size:1rem; }
+
+  .contact-channels{ list-style:none; margin:0; padding:0; display:grid; gap:.6rem; }
+  .contact-card{
+    display:grid;
+    grid-template-columns:1fr auto;
+    align-items:center;
+    gap:.15rem var(--space-2);
+    padding:.85rem var(--space-3);
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:3px;
+    text-decoration:none; color:inherit;
+    transition:border-color .2s ease, transform .2s ease, box-shadow .3s ease;
+  }
+  a.contact-card:hover{
+    border-color:var(--accent);
+    transform:translateX(3px);
+    box-shadow:0 16px 34px -24px color-mix(in srgb, var(--ink) 55%, transparent);
+  }
+  .contact-card.is-static{ background:transparent; }
+  .cc-label{
+    grid-column:1;
+    font-family:var(--font-mono); font-size:.68rem;
+    letter-spacing:.12em; text-transform:uppercase;
+    color:var(--ink-subtle);
+  }
+  .cc-value{
+    grid-column:1;
+    font-family:var(--font-mono); font-size:.95rem;
+    color:var(--ink);
+    overflow-wrap:anywhere;
+  }
+  .cc-aside{
+    grid-column:2; grid-row:1 / span 2;
+    font-family:var(--font-mono); font-size:.8rem;
+    color:var(--ink-subtle);
+    white-space:nowrap;
+    transition:color .2s ease, transform .2s ease;
+  }
+  a.contact-card:hover .cc-aside{ color:var(--accent); transform:translateX(2px); }
+
+  .contact-note{
+    margin:0;
+    font-family:var(--font-mono);
+    font-size:.74rem;
+    letter-spacing:.04em;
+    color:var(--ink-subtle);
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .status-dot{ animation:none; }
+    .contact-card, a.contact-card:hover{ transform:none; transition:border-color .2s ease; }
+  }
 
   /* ---------- pager ---------- */
   .pager{
@@ -618,6 +745,9 @@
   @media (max-width: 860px){
     nav.primary-nav{ gap:1rem; }
     nav.primary-nav a{ font-size:.72rem; }
+    .contact-grid{ grid-template-columns:1fr; gap:var(--space-4); }
+    .contact-lede{ max-width:62ch; }
+    .skills-grid{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
   }
 
   @media (max-width: 720px){
@@ -644,6 +774,8 @@
     .dossier-head{ flex-direction:column; padding-right:0; }
     .stamp{ position:static; margin:.6rem 0 .2rem; transform:rotate(-6deg); }
     .pager a{ max-width:48%; }
+    .skills-grid{ grid-template-columns:1fr; }
+    .skill-card.is-lead{ grid-column:span 1; }
   }
 </style>
 </head>
@@ -735,6 +867,7 @@
 
   <!-- ============ EXPERIENCE ============ -->
   <section class="page" id="experience" aria-labelledby="experience-title">
+    <canvas class="hero-scatter" aria-hidden="true"></canvas>
     <div class="wrap">
       <div class="page-head">
         <p class="eyebrow"><b>01</b> / Section</p>
@@ -780,6 +913,7 @@
 
   <!-- ============ WORK ============ -->
   <section class="page" id="work" aria-labelledby="work-title">
+    <canvas class="hero-scatter" aria-hidden="true"></canvas>
     <div class="wrap">
       <div class="page-head">
         <p class="eyebrow"><b>02</b> / Section</p>
@@ -871,6 +1005,7 @@
 
   <!-- ============ SKILLS ============ -->
   <section class="page" id="skills" aria-labelledby="skills-title">
+    <canvas class="hero-scatter" aria-hidden="true"></canvas>
     <div class="wrap">
       <div class="page-head">
         <p class="eyebrow"><b>03</b> / Section</p>
@@ -882,36 +1017,68 @@
       </div>
 
       <div class="skills-grid">
-        <div class="skill-card">
-          <h3>Artificial Intelligence</h3>
+        <div class="skill-card is-lead">
+          <div class="skill-head">
+            <span class="sk-n">01</span>
+            <h3>Artificial Intelligence</h3>
+            <span class="sk-count">05</span>
+          </div>
           <ul><li>LLMs &amp; Agentic RAG</li><li>LangChain</li><li>Supervised &amp; Unsupervised Learning</li><li>OpenRouter</li><li>Azure AI (Doc. Intelligence &amp; OCR)</li></ul>
         </div>
         <div class="skill-card">
-          <h3>Backend &amp; APIs</h3>
+          <div class="skill-head">
+            <span class="sk-n">02</span>
+            <h3>Backend &amp; APIs</h3>
+            <span class="sk-count">05</span>
+          </div>
           <ul><li>FastAPI</li><li>Django</li><li>Flask</li><li>REST API Design</li><li>OAuth (Gmail, Outlook)</li></ul>
         </div>
         <div class="skill-card">
-          <h3>Databases</h3>
+          <div class="skill-head">
+            <span class="sk-n">03</span>
+            <h3>Databases</h3>
+            <span class="sk-count">05</span>
+          </div>
           <ul><li>PostgreSQL</li><li>MySQL</li><li>MongoDB</li><li>Qdrant</li><li>Redis</li></ul>
         </div>
         <div class="skill-card">
-          <h3>Deployment &amp; MLOps</h3>
+          <div class="skill-head">
+            <span class="sk-n">04</span>
+            <h3>Deployment &amp; MLOps</h3>
+            <span class="sk-count">03</span>
+          </div>
           <ul><li>Docker</li><li>Containerization &amp; Image Builds</li><li>Model Versioning &amp; Monitoring</li></ul>
         </div>
         <div class="skill-card">
-          <h3>Data Engineering</h3>
+          <div class="skill-head">
+            <span class="sk-n">05</span>
+            <h3>Data Engineering</h3>
+            <span class="sk-count">03</span>
+          </div>
           <ul><li>Airflow</li><li>Automated Python Scrapers</li><li>Git</li></ul>
         </div>
         <div class="skill-card">
-          <h3>Programming</h3>
+          <div class="skill-head">
+            <span class="sk-n">06</span>
+            <h3>Programming</h3>
+            <span class="sk-count">03</span>
+          </div>
           <ul><li>Python</li><li>SQL</li><li>JavaScript</li></ul>
         </div>
         <div class="skill-card">
-          <h3>Quality Assurance</h3>
+          <div class="skill-head">
+            <span class="sk-n">07</span>
+            <h3>Quality Assurance</h3>
+            <span class="sk-count">03</span>
+          </div>
           <ul><li>Testing &amp; validation of AI pipelines</li><li>RAG system evaluation</li><li>Multi-tenant SaaS performance</li></ul>
         </div>
         <div class="skill-card">
-          <h3>Mentorship</h3>
+          <div class="skill-head">
+            <span class="sk-n">08</span>
+            <h3>Mentorship</h3>
+            <span class="sk-count">03</span>
+          </div>
           <ul><li>Trainee supervision</li><li>Code &amp; architecture review</li><li>RAG / backend guidance</li></ul>
         </div>
       </div>
@@ -922,25 +1089,59 @@
 
   <!-- ============ CONTACT ============ -->
   <section class="page" id="contact" aria-labelledby="contact-title">
+    <canvas class="hero-scatter" aria-hidden="true"></canvas>
     <div class="wrap">
       <div class="page-head">
         <p class="eyebrow"><b>04</b> / Section</p>
         <div class="head-row">
           <h2 id="contact-title" tabindex="-1">Get in touch</h2>
+          <span class="count">03 channels</span>
         </div>
         <p class="page-sub">Open to conversations about RAG systems, document intelligence, and applied AI engineering roles.</p>
       </div>
 
-      <div class="contact-inner">
-        <div class="contact-rows">
-          <div>Email — <a href="mailto:awadjoda5@gmail.com">awadjoda5@gmail.com</a></div>
-          <div>Phone — <a href="tel:+962789431221">+962 78 943 1221</a></div>
-          <div>Location — Amman, Jordan</div>
+      <div class="contact-grid">
+        <div class="contact-main">
+          <p class="status-chip"><span class="status-dot" aria-hidden="true"></span>Available for new roles &amp; projects</p>
+          <p class="contact-lede">Whether it&rsquo;s a RAG pipeline that has to survive real-world documents, an agentic workflow, or a seat on an applied AI team &mdash; send over the context and I&rsquo;ll reply with a straight answer.</p>
+          <div class="cta-row">
+            <a class="arrow-fill-btn" href="mailto:awadjoda5@gmail.com">
+              <span class="afb-label">Email me</span>
+              <span class="afb-fill" aria-hidden="true"></span>
+              <span class="afb-clip" aria-hidden="true"><span class="afb-label">Email me</span></span>
+              <span class="afb-icon" aria-hidden="true">
+                <svg class="afb-arrow-in" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                <svg class="afb-arrow-out" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              </span>
+            </a>
+            <a class="btn btn-ghost btn-pill" href="#work">Back to work</a>
+          </div>
+          <p class="contact-note">Usually replies within 24 hours &middot; Working hours GMT+3</p>
         </div>
-        <div class="cta-row">
-          <a class="btn btn-primary" href="mailto:awadjoda5@gmail.com">Email me</a>
-          <a class="btn btn-ghost" href="#work">Back to work</a>
-        </div>
+
+        <ul class="contact-channels" aria-label="Contact details">
+          <li>
+            <a class="contact-card" href="mailto:awadjoda5@gmail.com">
+              <span class="cc-label">Email</span>
+              <span class="cc-value">awadjoda5@gmail.com</span>
+              <span class="cc-aside" aria-hidden="true">&rarr;</span>
+            </a>
+          </li>
+          <li>
+            <a class="contact-card" href="tel:+962789431221">
+              <span class="cc-label">Phone</span>
+              <span class="cc-value">+962 78 943 1221</span>
+              <span class="cc-aside" aria-hidden="true">&rarr;</span>
+            </a>
+          </li>
+          <li>
+            <div class="contact-card is-static">
+              <span class="cc-label">Location</span>
+              <span class="cc-value">Amman, Jordan</span>
+              <span class="cc-aside">GMT+3</span>
+            </div>
+          </li>
+        </ul>
       </div>
 
       <div data-pager></div>
@@ -1158,8 +1359,8 @@
 
 <script>
 (function(){
-  var canvas = document.getElementById('constellation');
-  var ctx = canvas.getContext('2d');
+  var canvases = document.querySelectorAll('.hero-scatter');
+  if(!canvases.length) return;
   var reduce = matchMedia('(prefers-reduced-motion: reduce)');
 
   // Named after the reference component's props.
@@ -1174,9 +1375,10 @@
     saturation: 58,
     brightness: 72
   };
+  // density was tuned against the hero's roughly 8x12 cell grid; pages scale
+  // off that ratio so a taller section keeps the same points-per-area.
+  var REF_CELLS = 96;
   var hue = 214;
-
-  var pts = [], W = 0, H = 0, raf = 0, running = false, visible = false;
 
   function hexToHsl(hex){
     hex = hex.trim().replace('#','');
@@ -1195,134 +1397,148 @@
     return h;
   }
 
-  function build(){
-    pts = [];
-    if(!W || !H) return;
-    var cols = Math.max(2, Math.round(W / CFG.gap));
-    var rows = Math.max(2, Math.round(H / CFG.gap));
-    var cells = [];
-    for(var r=0;r<rows;r++) for(var c=0;c<cols;c++) cells.push([c, r]);
-    // Shuffle before trimming to density, or the points bunch into the top rows.
-    for(var i=cells.length-1;i>0;i--){
-      var j = Math.floor(Math.random()*(i+1));
-      var t = cells[i]; cells[i] = cells[j]; cells[j] = t;
-    }
-    cells = cells.slice(0, CFG.density);
-    var cw = W/cols, ch = H/rows;
-    cells.forEach(function(cell){
-      pts.push({
-        x: (cell[0] + .5)*cw + (Math.random()-.5)*cw*.7,
-        y: (cell[1] + .5)*ch + (Math.random()-.5)*ch*.7,
-        vx: (Math.random()-.5)*CFG.speed*2,
-        vy: (Math.random()-.5)*CFG.speed*2,
-        r: CFG.size*(.55 + Math.random()*.95),
-        tw: Math.random()*Math.PI*2,
-        tws: .008 + Math.random()*.014
-      });
-    });
-  }
-
-  function resize(){
-    var rect = canvas.getBoundingClientRect();
-    // The router display:none's #home, which zeroes the box — keep the old field.
-    if(!rect.width || !rect.height) return;
-    var dpr = Math.min(window.devicePixelRatio || 1, 2);
-    W = rect.width; H = rect.height;
-    canvas.width = Math.round(W*dpr);
-    canvas.height = Math.round(H*dpr);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    build();
-    if(reduce.matches) draw(false);
-  }
-
-  function draw(advance){
-    ctx.clearRect(0, 0, W, H);
-    if(!pts.length) return;
-    var i, j, a, b;
-
-    if(advance){
-      for(i=0;i<pts.length;i++){
-        a = pts[i];
-        a.x += a.vx; a.y += a.vy;
-        if(a.x < 0){ a.x = 0; a.vx = -a.vx; }
-        else if(a.x > W){ a.x = W; a.vx = -a.vx; }
-        if(a.y < 0){ a.y = 0; a.vy = -a.vy; }
-        else if(a.y > H){ a.y = H; a.vy = -a.vy; }
-        a.tw += a.tws;
-      }
-    }
-
-    var maxD = CFG.length, maxD2 = maxD*maxD;
-    var base = 'hsla(' + hue + ',' + CFG.saturation + '%,' + CFG.brightness + '%,';
-    ctx.lineWidth = CFG.strokeWidth;
-    for(i=0;i<pts.length;i++){
-      a = pts[i];
-      for(j=i+1;j<pts.length;j++){
-        b = pts[j];
-        var dx = a.x-b.x, dy = a.y-b.y, d2 = dx*dx + dy*dy;
-        if(d2 > maxD2) continue;
-        var t = 1 - Math.sqrt(d2)/maxD;
-        ctx.strokeStyle = base + (t*t*CFG.opacity*.7).toFixed(3) + ')';
-        ctx.beginPath();
-        ctx.moveTo(a.x, a.y);
-        ctx.lineTo(b.x, b.y);
-        ctx.stroke();
-      }
-    }
-
-    for(i=0;i<pts.length;i++){
-      a = pts[i];
-      ctx.fillStyle = base + (CFG.opacity*(.5 + Math.sin(a.tw)*.5*.6)).toFixed(3) + ')';
-      ctx.beginPath();
-      ctx.arc(a.x, a.y, a.r, 0, Math.PI*2);
-      ctx.fill();
-    }
-  }
-
-  function frame(){
-    draw(true);
-    raf = requestAnimationFrame(frame);
-  }
-  function start(){
-    if(running || reduce.matches || document.hidden || !visible) return;
-    running = true;
-    raf = requestAnimationFrame(frame);
-  }
-  function stop(){
-    running = false;
-    if(raf){ cancelAnimationFrame(raf); raf = 0; }
-  }
-
   var accent = getComputedStyle(document.documentElement).getPropertyValue('--accent');
   if(accent) hue = hexToHsl(accent);
 
-  // Pauses whenever the hero is off-route or scrolled away.
-  if('IntersectionObserver' in window){
-    new IntersectionObserver(function(entries){
-      visible = entries[0].isIntersecting;
-      if(visible){ if(!W) resize(); start(); } else stop();
-    }, { threshold:0 }).observe(canvas);
-  }else{
-    visible = true;
+  // One independent field per page. Only the routed page is ever intersecting,
+  // so at most one of these animates at a time.
+  function field(canvas){
+    var ctx = canvas.getContext('2d');
+    var pts = [], W = 0, H = 0, raf = 0, running = false, visible = false;
+
+    function build(){
+      pts = [];
+      if(!W || !H) return;
+      var cols = Math.max(2, Math.round(W / CFG.gap));
+      var rows = Math.max(2, Math.round(H / CFG.gap));
+      var cells = [];
+      for(var r=0;r<rows;r++) for(var c=0;c<cols;c++) cells.push([c, r]);
+      // Shuffle before trimming to density, or the points bunch into the top rows.
+      for(var i=cells.length-1;i>0;i--){
+        var j = Math.floor(Math.random()*(i+1));
+        var t = cells[i]; cells[i] = cells[j]; cells[j] = t;
+      }
+      var count = Math.max(8, Math.min(90, Math.round(cells.length * CFG.density / REF_CELLS)));
+      cells = cells.slice(0, count);
+      var cw = W/cols, ch = H/rows;
+      cells.forEach(function(cell){
+        pts.push({
+          x: (cell[0] + .5)*cw + (Math.random()-.5)*cw*.7,
+          y: (cell[1] + .5)*ch + (Math.random()-.5)*ch*.7,
+          vx: (Math.random()-.5)*CFG.speed*2,
+          vy: (Math.random()-.5)*CFG.speed*2,
+          r: CFG.size*(.55 + Math.random()*.95),
+          tw: Math.random()*Math.PI*2,
+          tws: .008 + Math.random()*.014
+        });
+      });
+    }
+
+    function resize(){
+      var rect = canvas.getBoundingClientRect();
+      // The router display:none's inactive pages, which zeroes the box — keep the old field.
+      if(!rect.width || !rect.height) return;
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      W = rect.width; H = rect.height;
+      canvas.width = Math.round(W*dpr);
+      canvas.height = Math.round(H*dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      build();
+      if(reduce.matches) draw(false);
+    }
+
+    function draw(advance){
+      ctx.clearRect(0, 0, W, H);
+      if(!pts.length) return;
+      var i, j, a, b;
+
+      if(advance){
+        for(i=0;i<pts.length;i++){
+          a = pts[i];
+          a.x += a.vx; a.y += a.vy;
+          if(a.x < 0){ a.x = 0; a.vx = -a.vx; }
+          else if(a.x > W){ a.x = W; a.vx = -a.vx; }
+          if(a.y < 0){ a.y = 0; a.vy = -a.vy; }
+          else if(a.y > H){ a.y = H; a.vy = -a.vy; }
+          a.tw += a.tws;
+        }
+      }
+
+      var maxD = CFG.length, maxD2 = maxD*maxD;
+      var base = 'hsla(' + hue + ',' + CFG.saturation + '%,' + CFG.brightness + '%,';
+      ctx.lineWidth = CFG.strokeWidth;
+      for(i=0;i<pts.length;i++){
+        a = pts[i];
+        for(j=i+1;j<pts.length;j++){
+          b = pts[j];
+          var dx = a.x-b.x, dy = a.y-b.y, d2 = dx*dx + dy*dy;
+          if(d2 > maxD2) continue;
+          var t = 1 - Math.sqrt(d2)/maxD;
+          ctx.strokeStyle = base + (t*t*CFG.opacity*.7).toFixed(3) + ')';
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+        }
+      }
+
+      for(i=0;i<pts.length;i++){
+        a = pts[i];
+        ctx.fillStyle = base + (CFG.opacity*(.5 + Math.sin(a.tw)*.5*.6)).toFixed(3) + ')';
+        ctx.beginPath();
+        ctx.arc(a.x, a.y, a.r, 0, Math.PI*2);
+        ctx.fill();
+      }
+    }
+
+    function frame(){
+      draw(true);
+      raf = requestAnimationFrame(frame);
+    }
+    function start(){
+      if(running || reduce.matches || document.hidden || !visible) return;
+      running = true;
+      raf = requestAnimationFrame(frame);
+    }
+    function stop(){
+      running = false;
+      if(raf){ cancelAnimationFrame(raf); raf = 0; }
+    }
+
+    // Pauses whenever this page is off-route or scrolled away.
+    if('IntersectionObserver' in window){
+      new IntersectionObserver(function(entries){
+        visible = entries[0].isIntersecting;
+        if(visible){ if(!W) resize(); start(); } else stop();
+      }, { threshold:0 }).observe(canvas);
+    }else{
+      visible = true;
+    }
+
+    if('ResizeObserver' in window){
+      new ResizeObserver(resize).observe(canvas);
+    }else{
+      var t; window.addEventListener('resize', function(){
+        clearTimeout(t); t = setTimeout(resize, 150);
+      });
+    }
+
+    resize();
+    if(reduce.matches) draw(false); else start();
+
+    return { start:start, stop:stop, draw:draw };
   }
 
-  if('ResizeObserver' in window){
-    new ResizeObserver(resize).observe(canvas);
-  }else{
-    var t; window.addEventListener('resize', function(){
-      clearTimeout(t); t = setTimeout(resize, 150);
-    });
-  }
+  var fields = Array.prototype.map.call(canvases, field);
 
   document.addEventListener('visibilitychange', function(){
-    if(document.hidden) stop(); else start();
+    fields.forEach(function(f){ if(document.hidden) f.stop(); else f.start(); });
   });
   reduce.addEventListener('change', function(){
-    if(reduce.matches){ stop(); draw(false); } else start();
+    fields.forEach(function(f){
+      if(reduce.matches){ f.stop(); f.draw(false); } else f.start();
+    });
   });
-
-  resize();
-  if(reduce.matches) draw(false); else start();
 })();
 </script>
 </body>
