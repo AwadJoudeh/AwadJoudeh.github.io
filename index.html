@@ -225,6 +225,18 @@
     line-height:1.02;
     max-width:14ch;
   }
+  /* Grid stacking (not absolute) so both layers wrap identically at every width. */
+  .fill-text-stack{ display:grid; }
+  .fill-text{ grid-area:1/1; color:color-mix(in srgb, var(--ink) 20%, transparent); }
+  .fill-text-fill{
+    color:var(--ink);
+    clip-path:inset(0 0 0 0);
+    transition:clip-path .5s cubic-bezier(.34,1.26,.64,1);
+  }
+  .js .fill-text-fill{ clip-path:inset(0 100% 0 0); }
+  @media (prefers-reduced-motion: reduce){
+    .js .fill-text-fill{ clip-path:inset(0 0 0 0); transition:none; }
+  }
   .role-line{
     font-family:var(--font-mono);
     font-size:clamp(.92rem, .4vw + .85rem, 1.05rem);
@@ -269,6 +281,54 @@
   .btn-ghost{ color:var(--ink); }
   .btn-ghost:hover{ border-color:var(--ink); }
   .btn:hover{ transform:translateY(-1px); }
+
+  /* ---------- glow button ---------- */
+  .btn-glow-wrap{ position:relative; display:inline-flex; }
+  .btn-glow-aura{
+    position:absolute; inset:-1px;
+    border-radius:3px;
+    background:linear-gradient(90deg, var(--accent), #7c5cbf, var(--stamp), var(--accent));
+    background-size:300% 100%;
+    filter:blur(11px);
+    opacity:.5;
+    pointer-events:none;
+    /* Slow fade out, fast fade in — matches the reference's 1000ms/200ms pairing. */
+    transition:opacity 1s ease;
+    animation:auraDrift 9s linear infinite;
+  }
+  @keyframes auraDrift{ from{ background-position:0% 50% } to{ background-position:300% 50% } }
+  .btn-glow-wrap:hover .btn-glow-aura,
+  .btn-glow-wrap:focus-within .btn-glow-aura{ opacity:1; transition-duration:.2s; }
+
+  .btn-glow{
+    position:relative;
+    display:inline-flex; align-items:center;
+    background:var(--ink); color:var(--bg);
+    border-color:var(--ink);
+    transition:transform .2s ease, background .2s ease, box-shadow .2s ease;
+  }
+  .btn-glow:hover{
+    background:color-mix(in srgb, var(--ink) 88%, var(--bg));
+    transform:translateY(-2px);
+    box-shadow:0 10px 22px -8px color-mix(in srgb, var(--ink) 45%, transparent);
+  }
+  .btn-arrow{
+    margin-left:.5rem; margin-right:-.2rem;
+    overflow:visible;
+    stroke:currentColor; stroke-width:2; fill:none;
+  }
+  .btn-arrow .arrow-line{ opacity:0; transition:opacity .2s ease; }
+  .btn-arrow .arrow-head{ transition:transform .2s ease; }
+  .btn-glow:hover .arrow-line,
+  .btn-glow:focus-visible .arrow-line{ opacity:1; }
+  .btn-glow:hover .arrow-head,
+  .btn-glow:focus-visible .arrow-head{ transform:translateX(3px); }
+
+  @media (prefers-reduced-motion: reduce){
+    .btn-glow-aura{ animation:none; }
+    .btn-glow:hover{ transform:none; }
+    .btn-arrow .arrow-head{ transition:none; }
+  }
 
   /* ---------- home section index ---------- */
   .index-block{ margin-top:var(--space-5); }
@@ -519,7 +579,7 @@
       <div class="hero-inner">
         <div>
           <p class="eyebrow">Dossier / AI Engineer</p>
-          <h1 id="home-title" tabindex="-1">Awad Joudeh</h1>
+          <h1 id="home-title" tabindex="-1"><span class="fill-text-stack"><span class="fill-text">Awad Joudeh</span><span class="fill-text fill-text-fill" aria-hidden="true">Awad Joudeh</span></span></h1>
           <p class="role-line">RAG systems &amp; document intelligence, built to ship</p>
         </div>
         <p class="lede">AI Engineer specializing in production-grade intelligent systems — from LLM-powered email automation to embeddable AI chatbots and regulatory compliance checking. I work across RAG pipelines, agentic architectures, and multi-tenant SaaS design, turning dense unstructured documents into structured, verifiable data.</p>
@@ -531,7 +591,10 @@
         </dl>
         <div class="cta-row">
           <a class="btn btn-primary" href="#work">View work</a>
-          <a class="btn btn-ghost" href="mailto:awadjoda5@gmail.com">Email me</a>
+          <span class="btn-glow-wrap">
+            <span class="btn-glow-aura" aria-hidden="true"></span>
+            <a class="btn btn-glow" href="mailto:awadjoda5@gmail.com">Email me<svg class="btn-arrow" viewBox="0 0 10 10" width="10" height="10" aria-hidden="true"><path class="arrow-line" d="M0 5h7"/><path class="arrow-head" d="M1 1l4 4-4 4"/></svg></a>
+          </span>
         </div>
       </div>
 
@@ -941,6 +1004,19 @@
     syncTheme();
   });
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', syncTheme);
+
+  // Hero name fills left-to-right in irregular spring steps.
+  var fillEl = document.querySelector('.fill-text-fill');
+  if(reduceMotion.matches){
+    fillEl.style.clipPath = 'inset(0 0 0 0)';
+  }else{
+    var filled = 0;
+    var fillTimer = setInterval(function(){
+      filled += 0.06 + Math.random() * 0.2;
+      if(filled >= 1){ filled = 1; clearInterval(fillTimer); }
+      fillEl.style.clipPath = 'inset(0 ' + (100 - filled * 100) + '% 0 0)';
+    }, 170);
+  }
 
   window.addEventListener('hashchange', route);
   syncTheme();
