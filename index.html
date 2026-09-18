@@ -217,22 +217,24 @@
     font-size:1.05rem;
     margin:0;
   }
-  .meta-block{
-    display:grid;
-    grid-template-columns:repeat(auto-fit, minmax(12rem, 1fr));
-    gap:.9rem 2rem;
-    padding:var(--space-3);
-    margin:0;
-    background:var(--surface);
-    border:1px solid var(--border);
-    border-radius:2px;
-    font-family:var(--font-mono);
-    font-size:.85rem;
-    max-width:38rem;
+  /* ---------- text generate: words blur in, one after another ---------- */
+  .sr-only{
+    position:absolute; width:1px; height:1px;
+    margin:-1px; padding:0; border:0;
+    clip:rect(0 0 0 0); clip-path:inset(50%);
+    overflow:hidden; white-space:nowrap;
   }
-  .meta-block dt{ color:var(--ink-subtle); font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; }
-  .meta-block dd{ margin:.2rem 0 0; color:var(--ink); }
-
+  .text-generate{ --tg-stagger:.045s; --tg-duration:.5s; }
+  .text-generate .tg-word{
+    display:inline-block; white-space:pre;
+    opacity:0; filter:blur(4px);
+    transition:opacity var(--tg-duration) ease, filter var(--tg-duration) ease;
+    transition-delay:calc(var(--i) * var(--tg-stagger));
+  }
+  .text-generate.is-generated .tg-word{ opacity:1; filter:blur(0); }
+  @media (prefers-reduced-motion: reduce){
+    .text-generate .tg-word{ opacity:1; filter:none; transition:none; }
+  }
   .cta-row{ display:flex; gap:var(--space-2); flex-wrap:wrap; }
   .btn{
     font-family:var(--font-mono);
@@ -564,13 +566,7 @@
           <h1 id="home-title" tabindex="-1"><span class="fill-text-stack"><span class="fill-text">Awad Joudeh</span><span class="fill-text fill-text-fill" aria-hidden="true">Awad Joudeh</span></span></h1>
           <p class="role-line">RAG systems &amp; document intelligence, built to ship</p>
         </div>
-        <p class="lede">AI Engineer specializing in production-grade intelligent systems — from LLM-powered email automation to embeddable AI chatbots and regulatory compliance checking. I work across RAG pipelines, agentic architectures, and multi-tenant SaaS design, turning dense unstructured documents into structured, verifiable data.</p>
-        <dl class="meta-block">
-          <div><dt>Location</dt><dd>Amman, Jordan</dd></div>
-          <div><dt>Focus</dt><dd>RAG · Agentic Systems · Doc Intelligence</dd></div>
-          <div><dt>Currently</dt><dd>AI Engineer @ Sengabi</dd></div>
-          <div><dt>Languages</dt><dd>Arabic (native), English</dd></div>
-        </dl>
+        <p class="lede text-generate" data-text-generate>AI Engineer specializing in production-grade intelligent systems — from LLM-powered email automation to embeddable AI chatbots and regulatory compliance checking. I work across RAG pipelines, agentic architectures, and multi-tenant SaaS design, turning dense unstructured documents into structured, verifiable data.</p>
         <div class="cta-row">
           <a class="btn btn-primary" href="#work">View work</a>
           <span class="btn-glow-wrap">
@@ -943,6 +939,36 @@
       if(filled >= 1){ filled = 1; clearInterval(fillTimer); }
       fillEl.style.clipPath = 'inset(0 ' + (100 - filled * 100) + '% 0 0)';
     }, 170);
+  }
+
+  // ---- lede: split into words so each can blur in on its own delay ----
+  var generateEl = document.querySelector('[data-text-generate]');
+  if(generateEl){
+    var full = generateEl.textContent.trim();
+    var sr = document.createElement('span');
+    sr.className = 'sr-only';
+    sr.textContent = full;
+
+    generateEl.setAttribute('aria-label', full);
+    generateEl.textContent = '';
+    generateEl.appendChild(sr);
+
+    full.split(' ').forEach(function(word, i){
+      var span = document.createElement('span');
+      span.className = 'tg-word';
+      span.setAttribute('aria-hidden', 'true');
+      span.style.setProperty('--i', i);
+      span.textContent = word + ' ';
+      generateEl.appendChild(span);
+    });
+
+    if(reduceMotion.matches){
+      generateEl.classList.add('is-generated');
+    }else{
+      requestAnimationFrame(function(){
+        requestAnimationFrame(function(){ generateEl.classList.add('is-generated'); });
+      });
+    }
   }
 
   // ---- home index cards: 3D tilt + staggered reveal ----
