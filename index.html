@@ -5,8 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Awad Joudeh — AI Engineer</title>
 <meta name="description" content="Awad Joudeh — AI Engineer in Amman, Jordan. RAG systems, agentic architectures and document intelligence, built to ship.">
-<meta name="theme-color" content="#eef0e8" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#12161c" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#12161c">
 <meta property="og:title" content="Awad Joudeh — AI Engineer">
 <meta property="og:description" content="RAG systems & document intelligence, built to ship.">
 <meta property="og:type" content="profile">
@@ -17,28 +16,24 @@
   (function(){
     var r = document.documentElement;
     r.classList.add('js');
-    try{
-      var t = localStorage.getItem('theme');
-      if(t === 'light' || t === 'dark') r.setAttribute('data-theme', t);
-    }catch(e){}
   })();
 </script>
 <style>
   :root{
-    --bg:#eef0e8;
-    --surface:#f8f9f3;
-    --surface-2:#e3e6d9;
-    --border:#d2d6c6;
-    --border-strong:#b7bda8;
-    --ink:#1b2430;
-    --ink-muted:#555f6a;
-    --ink-subtle:#828b82;
-    --accent:#1f4287;
-    --accent-hover:#16326a;
-    --accent-contrast:#ffffff;
-    --accent-soft:#dde5f1;
-    --stamp:#a3462b;
-    --stamp-soft:#f1ded5;
+    --bg:#12161c;
+    --surface:#171c23;
+    --surface-2:#1e252d;
+    --border:#2a323c;
+    --border-strong:#3a4451;
+    --ink:#e8e7dd;
+    --ink-muted:#aab2ba;
+    --ink-subtle:#7c8790;
+    --accent:#7ba1de;
+    --accent-hover:#9ab6e6;
+    --accent-contrast:#0d1116;
+    --accent-soft:#213248;
+    --stamp:#d98a67;
+    --stamp-soft:#3a2620;
 
     --font-display:'Fraunces', Georgia, 'Times New Roman', serif;
     --font-body:'Public Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -49,26 +44,6 @@
 
     --wrap:64rem;
 
-    color-scheme: light;
-  }
-  @media (prefers-color-scheme: dark){
-    :root:not([data-theme="light"]){
-      --bg:#12161c; --surface:#171c23; --surface-2:#1e252d;
-      --border:#2a323c; --border-strong:#3a4451;
-      --ink:#e8e7dd; --ink-muted:#aab2ba; --ink-subtle:#7c8790;
-      --accent:#7ba1de; --accent-hover:#9ab6e6; --accent-contrast:#0d1116;
-      --accent-soft:#213248;
-      --stamp:#d98a67; --stamp-soft:#3a2620;
-      color-scheme: dark;
-    }
-  }
-  :root[data-theme="dark"]{
-    --bg:#12161c; --surface:#171c23; --surface-2:#1e252d;
-    --border:#2a323c; --border-strong:#3a4451;
-    --ink:#e8e7dd; --ink-muted:#aab2ba; --ink-subtle:#7c8790;
-    --accent:#7ba1de; --accent-hover:#9ab6e6; --accent-contrast:#0d1116;
-    --accent-soft:#213248;
-    --stamp:#d98a67; --stamp-soft:#3a2620;
     color-scheme: dark;
   }
 
@@ -87,6 +62,16 @@
     flex-direction:column;
   }
   main{ flex:1; }
+
+  /* Beams paint above body's background but below content, which is lifted to z-index 1. */
+  #beams{
+    position:fixed; inset:0;
+    width:100%; height:100%;
+    z-index:0;
+    pointer-events:none;
+    filter:blur(30px);
+  }
+  main, footer{ position:relative; z-index:1; }
 
   a{ color:var(--accent); }
   ::selection{ background:var(--accent-soft); }
@@ -182,9 +167,6 @@
   }
   .icon-btn:hover{ color:var(--ink); border-color:var(--ink); }
   .icon-btn svg{ width:1.05rem; height:1.05rem; }
-  .theme-toggle .icon-sun{ display:none; }
-  .theme-toggle[data-mode="dark"] .icon-sun{ display:block; }
-  .theme-toggle[data-mode="dark"] .icon-moon{ display:none; }
   .nav-toggle{ display:none; }
 
   /* ---------- page router ---------- */
@@ -213,12 +195,8 @@
   .hero-scatter{
     position:absolute; top:0; right:0;
     width:min(46%, 26rem); height:100%;
-    opacity:.55;
+    opacity:.4;
     pointer-events:none;
-  }
-  :root[data-theme="dark"] .hero-scatter{ opacity:.4; }
-  @media (prefers-color-scheme: dark){
-    :root:not([data-theme="light"]) .hero-scatter{ opacity:.4; }
   }
   #home h1{
     font-size:clamp(2.5rem, 4vw + 1.4rem, 4.1rem);
@@ -339,20 +317,76 @@
     gap:var(--space-2);
   }
   .index-card{
-    display:grid; gap:.3rem; align-content:start;
+    --rx:0deg; --ry:0deg; --sheen:135deg;
+    position:relative;
+    display:block;
     padding:var(--space-3);
     background:var(--surface);
     border:1px solid var(--border);
-    border-radius:2px;
+    border-radius:3px;
     text-decoration:none; color:inherit;
-    transition:border-color .15s ease, transform .12s ease;
+    /* perspective() here (not on the grid) so each card tilts about its own centre. */
+    transform:perspective(900px) rotateX(var(--rx)) rotateY(var(--ry));
+    transform-style:preserve-3d;
+    transition:transform .55s cubic-bezier(.22,1,.36,1), border-color .2s ease, box-shadow .3s ease;
   }
-  .index-card:hover{ border-color:var(--accent); transform:translateY(-2px); }
+  .index-card.tilting{ transition:transform .1s linear, border-color .2s ease, box-shadow .3s ease; }
+  .index-card:hover{ border-color:var(--accent); box-shadow:0 18px 40px -22px color-mix(in srgb, var(--ink) 55%, transparent); }
+  .index-card:active{ transform:perspective(900px) rotateX(var(--rx)) rotateY(var(--ry)) scale(.98); }
+
+  .js .index-grid .index-card{ opacity:0; }
+  .js .index-grid.in .index-card{
+    opacity:1;
+    animation:cardIn .6s cubic-bezier(.23,1,.32,1) backwards;
+    animation-delay:calc(var(--i) * 80ms);
+  }
+  @keyframes cardIn{
+    from{ opacity:0; transform:perspective(900px) translateY(40px) rotateX(-15deg) scale(.95); }
+    to{ opacity:1; transform:perspective(900px) translateY(0) rotateX(0deg) scale(1); }
+  }
+
+  /* Negative Z puts the halo behind the card's own background, so only the spill shows. */
+  .card-glow{
+    position:absolute; inset:-2px; border-radius:inherit;
+    background:linear-gradient(135deg, var(--accent), var(--stamp));
+    filter:blur(14px);
+    opacity:0; pointer-events:none;
+    transform:translateZ(-14px);
+    transition:opacity .4s ease;
+  }
+  .index-card:hover .card-glow{ opacity:.2; }
+
+  .card-sheen{
+    position:absolute; inset:0; border-radius:inherit;
+    background:linear-gradient(var(--sheen), transparent 35%, rgba(255,255,255,.1) 50%, transparent 65%);
+    opacity:0; pointer-events:none;
+    transform:translateZ(20px);
+    transition:opacity .3s ease;
+  }
+  .index-card:hover .card-sheen{ opacity:1; }
+
+  .card-body{ position:relative; display:grid; gap:.3rem; transform:translateZ(22px); }
   .index-card .n{ font-family:var(--font-mono); font-size:.7rem; letter-spacing:.12em; color:var(--accent); }
   .index-card h3{ font-size:1.02rem; }
   .index-card p{ margin:0; font-size:.86rem; color:var(--ink-muted); }
-  .index-card .go{ font-family:var(--font-mono); font-size:.74rem; color:var(--ink-subtle); margin-top:.45rem; }
+  .index-card .go{
+    display:inline-flex; align-items:center; gap:.4rem;
+    font-family:var(--font-mono); font-size:.74rem; color:var(--ink-subtle); margin-top:.45rem;
+    transition:color .2s ease;
+  }
+  .index-card .go::before{
+    content:""; width:0; height:1px; background:var(--accent);
+    transition:width .3s cubic-bezier(.22,1,.36,1);
+  }
   .index-card:hover .go{ color:var(--accent); }
+  .index-card:hover .go::before{ width:1rem; }
+
+  @media (prefers-reduced-motion: reduce){
+    .js .index-grid .index-card{ opacity:1; }
+    .index-card{ transition:border-color .2s ease; }
+    .js .index-grid.in .index-card{ animation:none; }
+    .card-sheen{ display:none; }
+  }
 
   /* ---------- experience ledger ---------- */
   .ledger{ display:grid; gap:0; }
@@ -424,11 +458,7 @@
     text-transform:uppercase;
     line-height:1.15;
     background:var(--stamp-soft);
-    mix-blend-mode:multiply;
-  }
-  :root[data-theme="dark"] .stamp{ mix-blend-mode:normal; }
-  @media (prefers-color-scheme: dark){
-    :root:not([data-theme="light"]) .stamp{ mix-blend-mode:normal; }
+    mix-blend-mode:normal;
   }
 
   /* ---------- skills ---------- */
@@ -444,14 +474,6 @@
   }
   .skill-card ul{ list-style:none; margin:0; padding:0; display:grid; gap:.3rem; }
   .skill-card li{ font-size:.92rem; }
-
-  /* ---------- education / certs ---------- */
-  .two-col{ display:grid; grid-template-columns:1fr 1fr; gap:var(--space-4) var(--space-5); }
-  .two-col h3{ margin-bottom:.5rem; }
-  .field-row{ display:flex; justify-content:space-between; gap:1rem; padding-block:.45rem; border-top:1px solid var(--border); font-size:.92rem; }
-  .field-row:first-of-type{ border-top:none; }
-  .field-row .k{ color:var(--ink-muted); }
-  .field-row .v{ text-align:right; color:var(--ink); font-family:var(--font-mono); font-size:.84rem; }
 
   /* ---------- contact ---------- */
   .contact-inner{ display:grid; gap:var(--space-3); max-width:42rem; }
@@ -510,7 +532,6 @@
     .nav-toggle{ display:inline-flex; }
     .header-actions{ margin-inline-start:auto; }
     .ledger-row{ grid-template-columns:1fr; gap:.35rem; }
-    .two-col{ grid-template-columns:1fr; }
     .hero-scatter{ width:68%; opacity:.28; }
     .dossier{ padding:var(--space-3); }
     .dossier-head{ flex-direction:column; padding-right:0; }
@@ -520,6 +541,8 @@
 </style>
 </head>
 <body>
+
+<canvas id="beams" aria-hidden="true"></canvas>
 
 <a class="skip-link" href="#main">Skip to content</a>
 
@@ -532,15 +555,10 @@
       <a href="#experience" data-nav="experience">Experience</a>
       <a href="#work" data-nav="work">Work</a>
       <a href="#skills" data-nav="skills">Skills</a>
-      <a href="#education" data-nav="education">Education</a>
       <a href="#contact" data-nav="contact">Contact</a>
     </nav>
 
     <div class="header-actions">
-      <button class="icon-btn theme-toggle" id="themeToggle" type="button" aria-label="Switch theme">
-        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
-        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
-      </button>
       <button class="icon-btn nav-toggle" id="navToggle" type="button" aria-label="Toggle navigation" aria-expanded="false" aria-controls="primaryNav">≡</button>
     </div>
   </div>
@@ -599,7 +617,7 @@
       </div>
 
       <div class="index-block">
-        <p class="eyebrow">Index / 05 sections</p>
+        <p class="eyebrow">Index / 04 sections</p>
         <div class="index-grid">
           <a class="index-card" href="#experience">
             <span class="n">01</span>
@@ -619,14 +637,8 @@
             <p>AI, backend, databases, MLOps and data engineering.</p>
             <span class="go">08 domains →</span>
           </a>
-          <a class="index-card" href="#education">
-            <span class="n">04</span>
-            <h3>Education</h3>
-            <p>B.Sc. Data Science &amp; AI, plus certifications.</p>
-            <span class="go">Credentials →</span>
-          </a>
           <a class="index-card" href="#contact">
-            <span class="n">05</span>
+            <span class="n">04</span>
             <h3>Contact</h3>
             <p>Email, phone and where I'm based.</p>
             <span class="go">Get in touch →</span>
@@ -825,40 +837,11 @@
     </div>
   </section>
 
-  <!-- ============ EDUCATION ============ -->
-  <section class="page" id="education" aria-labelledby="education-title">
-    <div class="wrap">
-      <div class="page-head">
-        <p class="eyebrow"><b>04</b> / Section</p>
-        <div class="head-row">
-          <h2 id="education-title" tabindex="-1">Education &amp; certifications</h2>
-          <span class="count">01 degree · 02 certs</span>
-        </div>
-        <p class="page-sub">Formal background in data science and AI, plus industry certifications.</p>
-      </div>
-
-      <div class="two-col">
-        <div>
-          <h3>Education</h3>
-          <div class="field-row"><span class="k">B.Sc. Data Science &amp; AI</span><span class="v">2021 – 2025</span></div>
-          <div class="field-row"><span class="k">Hashemite University</span><span class="v">Jordan</span></div>
-        </div>
-        <div>
-          <h3>Certifications</h3>
-          <div class="field-row"><span class="k">Machine Learning</span><span class="v">Zain Zinc</span></div>
-          <div class="field-row"><span class="k">Artificial Intelligence</span><span class="v">TAG.Global</span></div>
-        </div>
-      </div>
-
-      <div data-pager></div>
-    </div>
-  </section>
-
   <!-- ============ CONTACT ============ -->
   <section class="page" id="contact" aria-labelledby="contact-title">
     <div class="wrap">
       <div class="page-head">
-        <p class="eyebrow"><b>05</b> / Section</p>
+        <p class="eyebrow"><b>04</b> / Section</p>
         <div class="head-row">
           <h2 id="contact-title" tabindex="-1">Get in touch</h2>
         </div>
@@ -898,13 +881,11 @@
     { id:'experience', label:'Experience',  title:'Experience — Awad Joudeh' },
     { id:'work',       label:'Selected work', title:'Selected work — Awad Joudeh' },
     { id:'skills',     label:'Skills index', title:'Skills — Awad Joudeh' },
-    { id:'education',  label:'Education',   title:'Education — Awad Joudeh' },
     { id:'contact',    label:'Contact',     title:'Contact — Awad Joudeh' }
   ];
 
   var nav = document.getElementById('primaryNav');
   var navToggle = document.getElementById('navToggle');
-  var themeToggle = document.getElementById('themeToggle');
   var navLinks = nav.querySelectorAll('a[data-nav]');
   var reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
 
@@ -987,24 +968,6 @@
     target.click();
   });
 
-  function effectiveTheme(){
-    var t = root.getAttribute('data-theme');
-    if(t) return t;
-    return matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  }
-  function syncTheme(){
-    var t = effectiveTheme();
-    themeToggle.dataset.mode = t;
-    themeToggle.setAttribute('aria-label', t === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
-  }
-  themeToggle.addEventListener('click', function(){
-    var next = effectiveTheme() === 'dark' ? 'light' : 'dark';
-    root.setAttribute('data-theme', next);
-    try{ localStorage.setItem('theme', next); }catch(e){}
-    syncTheme();
-  });
-  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', syncTheme);
-
   // Hero name fills left-to-right in irregular spring steps.
   var fillEl = document.querySelector('.fill-text-fill');
   if(reduceMotion.matches){
@@ -1018,9 +981,217 @@
     }, 170);
   }
 
+  // ---- home index cards: 3D tilt + staggered reveal ----
+  var indexGrid = document.querySelector('.index-grid');
+  var indexCards = Array.prototype.slice.call(indexGrid.querySelectorAll('.index-card'));
+
+  indexCards.forEach(function(card, i){
+    card.style.setProperty('--i', i);
+    var body = document.createElement('span');
+    body.className = 'card-body';
+    while(card.firstChild) body.appendChild(card.firstChild);
+    card.innerHTML =
+      '<span class="card-glow" aria-hidden="true"></span>' +
+      '<span class="card-sheen" aria-hidden="true"></span>';
+    card.appendChild(body);
+  });
+
+  if('IntersectionObserver' in window){
+    var cardIO = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){ indexGrid.classList.add('in'); cardIO.disconnect(); }
+      });
+    }, { threshold:.12 });
+    cardIO.observe(indexGrid);
+  }else{
+    indexGrid.classList.add('in');
+  }
+
+  // Tilt is pointer-only: on touch it would fire mid-scroll and fight the tap.
+  if(matchMedia('(hover: hover) and (pointer: fine)').matches && !reduceMotion.matches){
+    var TILT = 13;
+    indexCards.forEach(function(card){
+      var mx = 0, my = 0, frame = 0;
+
+      function apply(){
+        frame = 0;
+        var r = card.getBoundingClientRect();
+        if(!r.width) return;
+        var px = (mx - r.left) / r.width - 0.5;
+        var py = (my - r.top) / r.height - 0.5;
+        card.style.setProperty('--rx', (py * -TILT).toFixed(2) + 'deg');
+        card.style.setProperty('--ry', (px * TILT).toFixed(2) + 'deg');
+        card.style.setProperty('--sheen', (px * 60 + 135).toFixed(1) + 'deg');
+      }
+
+      card.addEventListener('pointerenter', function(){ card.classList.add('tilting'); });
+      card.addEventListener('pointermove', function(e){
+        mx = e.clientX; my = e.clientY;
+        if(!frame) frame = requestAnimationFrame(apply);
+      });
+      card.addEventListener('pointerleave', function(){
+        if(frame){ cancelAnimationFrame(frame); frame = 0; }
+        card.classList.remove('tilting');
+        card.style.setProperty('--rx', '0deg');
+        card.style.setProperty('--ry', '0deg');
+      });
+    });
+  }
+
   window.addEventListener('hashchange', route);
-  syncTheme();
   route();
+})();
+</script>
+
+<script>
+(function(){
+  var canvas = document.getElementById('beams');
+  var ctx = canvas.getContext('2d');
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)');
+  var darkQuery = matchMedia('(prefers-color-scheme: dark)');
+
+  var BEAM_COUNT = 18;
+  var beams = [];
+  var W = 0, H = 0, raf = 0, running = false;
+  var hue = 210, sat = 65, light = 62, alpha = .2;
+
+  function hexToHsl(hex){
+    hex = hex.trim().replace('#','');
+    if(hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+    var r = parseInt(hex.slice(0,2),16)/255,
+        g = parseInt(hex.slice(2,4),16)/255,
+        b = parseInt(hex.slice(4,6),16)/255;
+    var max = Math.max(r,g,b), min = Math.min(r,g,b), d = max - min;
+    var l = (max+min)/2, s = 0, h = 0;
+    if(d){
+      s = l > .5 ? d/(2-max-min) : d/(max+min);
+      if(max === r) h = (g-b)/d + (g < b ? 6 : 0);
+      else if(max === g) h = (b-r)/d + 2;
+      else h = (r-g)/d + 4;
+      h *= 60;
+    }
+    return [h, s*100, l*100];
+  }
+
+  // Tint follows --accent, so the beams track the theme instead of the reference's fixed cyan/purple.
+  function readPalette(){
+    var accent = getComputedStyle(document.documentElement).getPropertyValue('--accent');
+    if(accent) hue = hexToHsl(accent)[0];
+    var dark = (document.documentElement.getAttribute('data-theme') ||
+                (darkQuery.matches ? 'dark' : 'light')) === 'dark';
+    sat   = dark ? 68 : 55;
+    light = dark ? 66 : 50;
+    alpha = dark ? .22 : .10;
+    if(reduce.matches) drawFrame(false);
+  }
+
+  function makeBeam(i){
+    return {
+      x: Math.random()*W*1.5 - W*.25,
+      y: Math.random()*H*1.5 - H*.25,
+      w: 90 + Math.random()*110,
+      len: H*2.2,
+      angle: -35 + Math.random()*10,
+      speed: .35 + Math.random()*.5,
+      mul: .7 + Math.random()*.5,
+      shift: -30 + (i*60)/BEAM_COUNT,
+      pulse: Math.random()*Math.PI*2,
+      pulseSpeed: .012 + Math.random()*.018
+    };
+  }
+
+  function resetBeam(b, i){
+    var spacing = W/3;
+    b.y = H + 100;
+    b.x = (i % 3)*spacing + spacing/2 + (Math.random()-.5)*spacing*.6;
+    b.w = 90 + Math.random()*110;
+    b.len = H*2.2;
+    b.speed = .35 + Math.random()*.5;
+    b.mul = .7 + Math.random()*.5;
+  }
+
+  function resize(){
+    // Cap DPR: a full-viewport blurred canvas at 3x costs a lot for no visible gain.
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width = Math.round(W*dpr);
+    canvas.height = Math.round(H*dpr);
+    canvas.style.width = W+'px';
+    canvas.style.height = H+'px';
+    // setTransform, not scale — scale() would compound on every resize.
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if(!beams.length){
+      for(var i=0;i<BEAM_COUNT;i++) beams.push(makeBeam(i));
+    }
+    if(reduce.matches) drawFrame(false);
+  }
+
+  function drawBeam(b){
+    ctx.save();
+    ctx.translate(b.x, b.y);
+    ctx.rotate(b.angle*Math.PI/180);
+    var a = alpha * b.mul * (.8 + Math.sin(b.pulse)*.2);
+    var c = 'hsla(' + (hue + b.shift) + ',' + sat + '%,' + light + '%,';
+    var g = ctx.createLinearGradient(0, 0, 0, b.len);
+    g.addColorStop(0,  c + '0)');
+    g.addColorStop(.1, c + (a*.5) + ')');
+    g.addColorStop(.4, c + a + ')');
+    g.addColorStop(.6, c + a + ')');
+    g.addColorStop(.9, c + (a*.5) + ')');
+    g.addColorStop(1,  c + '0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(-b.w/2, 0, b.w, b.len);
+    ctx.restore();
+  }
+
+  function drawFrame(advance){
+    ctx.clearRect(0, 0, W, H);
+    for(var i=0;i<beams.length;i++){
+      var b = beams[i];
+      if(advance){
+        b.y -= b.speed;
+        b.pulse += b.pulseSpeed;
+        if(b.y + b.len < -100) resetBeam(b, i);
+      }
+      drawBeam(b);
+    }
+  }
+
+  function frame(){
+    drawFrame(true);
+    raf = requestAnimationFrame(frame);
+  }
+
+  function start(){
+    if(running || reduce.matches || document.hidden) return;
+    running = true;
+    raf = requestAnimationFrame(frame);
+  }
+  function stop(){
+    running = false;
+    if(raf){ cancelAnimationFrame(raf); raf = 0; }
+  }
+
+  var resizeTimer;
+  window.addEventListener('resize', function(){
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(resize, 150);
+  });
+  document.addEventListener('visibilitychange', function(){
+    if(document.hidden) stop(); else start();
+  });
+  new MutationObserver(readPalette).observe(document.documentElement, {
+    attributes:true, attributeFilter:['data-theme']
+  });
+  darkQuery.addEventListener('change', readPalette);
+  reduce.addEventListener('change', function(){
+    if(reduce.matches){ stop(); drawFrame(false); } else start();
+  });
+
+  resize();
+  readPalette();
+  if(reduce.matches) drawFrame(false); else start();
 })();
 </script>
 </body>
