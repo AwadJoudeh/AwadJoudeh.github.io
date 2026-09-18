@@ -235,7 +235,7 @@
   @media (prefers-reduced-motion: reduce){
     .text-generate .tg-word{ opacity:1; filter:none; transition:none; }
   }
-  .cta-row{ display:flex; gap:var(--space-2); flex-wrap:wrap; }
+  .cta-row{ display:flex; align-items:center; gap:var(--space-2); flex-wrap:wrap; }
   .btn{
     font-family:var(--font-mono);
     font-size:.85rem;
@@ -256,7 +256,7 @@
   .btn-glow-wrap{ position:relative; display:inline-flex; }
   .btn-glow-aura{
     position:absolute; inset:-1px;
-    border-radius:3px;
+    border-radius:999px;
     background:linear-gradient(90deg, var(--accent), #7c5cbf, var(--stamp), var(--accent));
     background-size:300% 100%;
     filter:blur(11px);
@@ -272,7 +272,11 @@
 
   .btn-glow{
     position:relative;
-    display:inline-flex; align-items:center;
+    display:inline-flex; align-items:center; justify-content:center;
+    /* shape matched to .arrow-fill-btn */
+    height:2.9rem;
+    padding:0 1.4rem;
+    border-radius:999px;
     background:var(--ink); color:var(--bg);
     border-color:var(--ink);
     transition:transform .2s ease, background .2s ease, box-shadow .2s ease;
@@ -298,6 +302,117 @@
     .btn-glow-aura{ animation:none; }
     .btn-glow:hover{ transform:none; }
     .btn-arrow .arrow-head{ transition:none; }
+  }
+
+  /* ---------- arrow fill button ---------- */
+  .arrow-fill-btn{
+    --afb-h:2.9rem;
+    --afb-pad:1.4rem;
+    --afb-circle:2.2rem;
+    --afb-right:.35rem;
+    --afb-inset-y:calc((var(--afb-h) - var(--afb-circle)) / 2);
+    --afb-ease:cubic-bezier(.785,.135,.15,.86);
+    --afb-duration:.45s;
+
+    --afb-bg:var(--accent);
+    --afb-text:var(--accent-contrast);
+    --afb-fill-bg:var(--ink);
+    --afb-fill-text:var(--accent-contrast);
+
+    position:relative;
+    display:inline-flex; align-items:center; justify-content:center;
+    height:var(--afb-h);
+    width:fit-content;
+    padding:0 calc(var(--afb-circle) + var(--afb-right) + var(--afb-pad)) 0 var(--afb-pad);
+    border:1px solid var(--afb-bg);
+    border-radius:999px;
+    background:var(--afb-bg);
+    color:var(--afb-text);
+    overflow:hidden;
+    white-space:nowrap;
+    text-decoration:none;
+    font-family:var(--font-mono);
+    font-size:.85rem;
+    line-height:1;
+    letter-spacing:.03em;
+    text-rendering:geometricPrecision;
+  }
+  .arrow-fill-btn > .afb-label{ position:relative; z-index:1; padding-bottom:1px; }
+
+  /* the pill that grows out of the icon circle */
+  .afb-fill{
+    position:absolute; z-index:2;
+    top:var(--afb-inset-y); bottom:var(--afb-inset-y);
+    right:var(--afb-right); left:calc(100% - var(--afb-right) - var(--afb-circle));
+    border-radius:999px;
+    background:var(--afb-fill-bg);
+    pointer-events:none;
+    transition:top var(--afb-duration) var(--afb-ease), right var(--afb-duration) var(--afb-ease), bottom var(--afb-duration) var(--afb-ease), left var(--afb-duration) var(--afb-ease), background var(--afb-duration) var(--afb-ease);
+  }
+
+  /* second copy of the label, revealed as the fill sweeps across */
+  .afb-clip{
+    position:absolute; inset:0; z-index:2;
+    display:flex; align-items:center;
+    padding:0 calc(var(--afb-circle) + var(--afb-right) + var(--afb-pad)) 0 var(--afb-pad);
+    color:var(--afb-fill-text);
+    pointer-events:none;
+    clip-path:inset(var(--afb-inset-y) var(--afb-right) var(--afb-inset-y) calc(100% - var(--afb-right) - var(--afb-circle)));
+    transition:clip-path var(--afb-duration) var(--afb-ease), color var(--afb-duration) var(--afb-ease);
+  }
+  .afb-clip .afb-label{ white-space:nowrap; padding-bottom:1px; }
+
+  .afb-icon{
+    position:absolute; z-index:3;
+    top:50%; right:var(--afb-right);
+    width:var(--afb-circle); height:var(--afb-circle);
+    transform:translateY(-50%);
+    display:inline-flex; align-items:center; justify-content:center;
+    border-radius:999px;
+    background:var(--afb-fill-bg);
+    color:var(--afb-fill-text);
+    overflow:hidden;
+    pointer-events:none;
+    -webkit-mask-image:-webkit-radial-gradient(white, black);
+    mask-image:radial-gradient(white, black);
+    transition:background var(--afb-duration) var(--afb-ease), color var(--afb-duration) var(--afb-ease);
+  }
+  .afb-icon svg{
+    position:absolute; top:50%; left:50%;
+    width:1.05rem; height:1.05rem;
+    stroke:currentColor; stroke-width:1.8; fill:none;
+    stroke-linecap:round; stroke-linejoin:round;
+    transform-origin:center;
+    transition:transform var(--afb-duration) var(--afb-ease);
+  }
+  /* incoming arrow waits off to the left, outgoing arrow sits centred */
+  .afb-icon .afb-arrow-in{ transform:translate(-170%, -50%) scale(0); }
+  .afb-icon .afb-arrow-out{ transform:translate(-50%, -50%); }
+
+  .arrow-fill-btn:hover .afb-fill,
+  .arrow-fill-btn:focus-visible .afb-fill{ inset:0; }
+  .arrow-fill-btn:hover .afb-clip,
+  .arrow-fill-btn:focus-visible .afb-clip{ clip-path:inset(0 0 0 0); }
+  .arrow-fill-btn:hover .afb-arrow-in,
+  .arrow-fill-btn:focus-visible .afb-arrow-in{ transform:translate(-50%, -50%) scale(1); }
+  .arrow-fill-btn:hover .afb-arrow-out,
+  .arrow-fill-btn:focus-visible .afb-arrow-out{ transform:translate(70%, -50%) scale(0); }
+
+  /* touch devices get the same sweep on press */
+  @media (hover: none){
+    .arrow-fill-btn:active .afb-fill{ inset:0; }
+    .arrow-fill-btn:active .afb-clip{ clip-path:inset(0 0 0 0); }
+    .arrow-fill-btn:active .afb-arrow-in{ transform:translate(-50%, -50%) scale(1); }
+    .arrow-fill-btn:active .afb-arrow-out{ transform:translate(70%, -50%) scale(0); }
+  }
+
+  @media (max-width: 700px){
+    .arrow-fill-btn{ --afb-h:3.1rem; --afb-pad:1.5rem; --afb-circle:2.4rem; }
+    .btn-glow{ height:3.1rem; padding:0 1.5rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .afb-fill, .afb-clip, .afb-icon, .afb-icon svg{ transition:none; }
   }
 
   /* ---------- home section index ---------- */
@@ -568,7 +683,15 @@
         </div>
         <p class="lede text-generate" data-text-generate>AI Engineer specializing in production-grade intelligent systems — from LLM-powered email automation to embeddable AI chatbots and regulatory compliance checking. I work across RAG pipelines, agentic architectures, and multi-tenant SaaS design, turning dense unstructured documents into structured, verifiable data.</p>
         <div class="cta-row">
-          <a class="btn btn-primary" href="#work">View work</a>
+          <a class="arrow-fill-btn" href="#work">
+            <span class="afb-label">View work</span>
+            <span class="afb-fill" aria-hidden="true"></span>
+            <span class="afb-clip" aria-hidden="true"><span class="afb-label">View work</span></span>
+            <span class="afb-icon" aria-hidden="true">
+              <svg class="afb-arrow-in" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              <svg class="afb-arrow-out" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </span>
+          </a>
           <span class="btn-glow-wrap">
             <span class="btn-glow-aura" aria-hidden="true"></span>
             <a class="btn btn-glow" href="mailto:awadjoda5@gmail.com">Email me<svg class="btn-arrow" viewBox="0 0 10 10" width="10" height="10" aria-hidden="true"><path class="arrow-line" d="M0 5h7"/><path class="arrow-head" d="M1 1l4 4-4 4"/></svg></a>
