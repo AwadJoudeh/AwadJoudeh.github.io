@@ -63,16 +63,6 @@
   }
   main{ flex:1; }
 
-  /* Beams paint above body's background but below content, which is lifted to z-index 1. */
-  #beams{
-    position:fixed; inset:0;
-    width:100%; height:100%;
-    z-index:0;
-    pointer-events:none;
-    filter:blur(30px);
-  }
-  main, footer{ position:relative; z-index:1; }
-
   a{ color:var(--accent); }
   ::selection{ background:var(--accent-soft); }
   :focus-visible{ outline:2px solid var(--accent); outline-offset:3px; border-radius:1px; }
@@ -542,8 +532,6 @@
 </head>
 <body>
 
-<canvas id="beams" aria-hidden="true"></canvas>
-
 <a class="skip-link" href="#main">Skip to content</a>
 
 <header class="site-header">
@@ -568,31 +556,7 @@
 
   <!-- ============ HOME ============ -->
   <section class="page" id="home" aria-labelledby="home-title">
-    <svg class="hero-scatter" viewBox="0 0 400 520" fill="none" aria-hidden="true">
-      <g stroke="var(--accent)" stroke-width="1">
-        <line x1="70" y1="90" x2="150" y2="150" opacity=".5"/>
-        <line x1="150" y1="150" x2="140" y2="240" opacity=".35"/>
-        <line x1="150" y1="150" x2="260" y2="130" opacity=".4"/>
-        <line x1="260" y1="130" x2="320" y2="210" opacity=".3"/>
-        <line x1="140" y1="240" x2="220" y2="320" opacity=".3"/>
-        <line x1="220" y1="320" x2="180" y2="410" opacity=".35"/>
-        <line x1="220" y1="320" x2="310" y2="360" opacity=".3"/>
-      </g>
-      <g fill="var(--accent)">
-        <circle cx="70" cy="90" r="3.5"/>
-        <circle cx="150" cy="150" r="5"/>
-        <circle cx="260" cy="130" r="3"/>
-        <circle cx="320" cy="210" r="3.5"/>
-        <circle cx="140" cy="240" r="4"/>
-        <circle cx="220" cy="320" r="5.5"/>
-        <circle cx="180" cy="410" r="3"/>
-        <circle cx="310" cy="360" r="3.5"/>
-        <circle cx="60" cy="330" r="2.5" opacity=".6"/>
-        <circle cx="350" cy="290" r="2.5" opacity=".6"/>
-        <circle cx="100" cy="460" r="2.5" opacity=".6"/>
-        <circle cx="290" cy="70" r="2.5" opacity=".6"/>
-      </g>
-    </svg>
+    <canvas class="hero-scatter" id="constellation" aria-hidden="true"></canvas>
     <div class="wrap">
       <div class="hero-inner">
         <div>
@@ -1045,15 +1009,25 @@
 
 <script>
 (function(){
-  var canvas = document.getElementById('beams');
+  var canvas = document.getElementById('constellation');
   var ctx = canvas.getContext('2d');
   var reduce = matchMedia('(prefers-reduced-motion: reduce)');
-  var darkQuery = matchMedia('(prefers-color-scheme: dark)');
 
-  var BEAM_COUNT = 18;
-  var beams = [];
-  var W = 0, H = 0, raf = 0, running = false;
-  var hue = 210, sat = 65, light = 62, alpha = .2;
+  // Named after the reference component's props.
+  var CFG = {
+    density: 30,
+    gap: 52,
+    size: 2,
+    length: 118,
+    strokeWidth: 1,
+    speed: .12,
+    opacity: .85,
+    saturation: 58,
+    brightness: 72
+  };
+  var hue = 214;
+
+  var pts = [], W = 0, H = 0, raf = 0, running = false, visible = false;
 
   function hexToHsl(hex){
     hex = hex.trim().replace('#','');
@@ -1062,109 +1036,106 @@
         g = parseInt(hex.slice(2,4),16)/255,
         b = parseInt(hex.slice(4,6),16)/255;
     var max = Math.max(r,g,b), min = Math.min(r,g,b), d = max - min;
-    var l = (max+min)/2, s = 0, h = 0;
+    var l = (max+min)/2, h = 0;
     if(d){
-      s = l > .5 ? d/(2-max-min) : d/(max+min);
       if(max === r) h = (g-b)/d + (g < b ? 6 : 0);
       else if(max === g) h = (b-r)/d + 2;
       else h = (r-g)/d + 4;
       h *= 60;
     }
-    return [h, s*100, l*100];
+    return h;
   }
 
-  // Tint follows --accent, so the beams track the theme instead of the reference's fixed cyan/purple.
-  function readPalette(){
-    var accent = getComputedStyle(document.documentElement).getPropertyValue('--accent');
-    if(accent) hue = hexToHsl(accent)[0];
-    var dark = (document.documentElement.getAttribute('data-theme') ||
-                (darkQuery.matches ? 'dark' : 'light')) === 'dark';
-    sat   = dark ? 68 : 55;
-    light = dark ? 66 : 50;
-    alpha = dark ? .22 : .10;
-    if(reduce.matches) drawFrame(false);
-  }
-
-  function makeBeam(i){
-    return {
-      x: Math.random()*W*1.5 - W*.25,
-      y: Math.random()*H*1.5 - H*.25,
-      w: 90 + Math.random()*110,
-      len: H*2.2,
-      angle: -35 + Math.random()*10,
-      speed: .35 + Math.random()*.5,
-      mul: .7 + Math.random()*.5,
-      shift: -30 + (i*60)/BEAM_COUNT,
-      pulse: Math.random()*Math.PI*2,
-      pulseSpeed: .012 + Math.random()*.018
-    };
-  }
-
-  function resetBeam(b, i){
-    var spacing = W/3;
-    b.y = H + 100;
-    b.x = (i % 3)*spacing + spacing/2 + (Math.random()-.5)*spacing*.6;
-    b.w = 90 + Math.random()*110;
-    b.len = H*2.2;
-    b.speed = .35 + Math.random()*.5;
-    b.mul = .7 + Math.random()*.5;
+  function build(){
+    pts = [];
+    if(!W || !H) return;
+    var cols = Math.max(2, Math.round(W / CFG.gap));
+    var rows = Math.max(2, Math.round(H / CFG.gap));
+    var cells = [];
+    for(var r=0;r<rows;r++) for(var c=0;c<cols;c++) cells.push([c, r]);
+    // Shuffle before trimming to density, or the points bunch into the top rows.
+    for(var i=cells.length-1;i>0;i--){
+      var j = Math.floor(Math.random()*(i+1));
+      var t = cells[i]; cells[i] = cells[j]; cells[j] = t;
+    }
+    cells = cells.slice(0, CFG.density);
+    var cw = W/cols, ch = H/rows;
+    cells.forEach(function(cell){
+      pts.push({
+        x: (cell[0] + .5)*cw + (Math.random()-.5)*cw*.7,
+        y: (cell[1] + .5)*ch + (Math.random()-.5)*ch*.7,
+        vx: (Math.random()-.5)*CFG.speed*2,
+        vy: (Math.random()-.5)*CFG.speed*2,
+        r: CFG.size*(.55 + Math.random()*.95),
+        tw: Math.random()*Math.PI*2,
+        tws: .008 + Math.random()*.014
+      });
+    });
   }
 
   function resize(){
-    // Cap DPR: a full-viewport blurred canvas at 3x costs a lot for no visible gain.
+    var rect = canvas.getBoundingClientRect();
+    // The router display:none's #home, which zeroes the box — keep the old field.
+    if(!rect.width || !rect.height) return;
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
-    W = window.innerWidth;
-    H = window.innerHeight;
+    W = rect.width; H = rect.height;
     canvas.width = Math.round(W*dpr);
     canvas.height = Math.round(H*dpr);
-    canvas.style.width = W+'px';
-    canvas.style.height = H+'px';
-    // setTransform, not scale — scale() would compound on every resize.
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    if(!beams.length){
-      for(var i=0;i<BEAM_COUNT;i++) beams.push(makeBeam(i));
-    }
-    if(reduce.matches) drawFrame(false);
+    build();
+    if(reduce.matches) draw(false);
   }
 
-  function drawBeam(b){
-    ctx.save();
-    ctx.translate(b.x, b.y);
-    ctx.rotate(b.angle*Math.PI/180);
-    var a = alpha * b.mul * (.8 + Math.sin(b.pulse)*.2);
-    var c = 'hsla(' + (hue + b.shift) + ',' + sat + '%,' + light + '%,';
-    var g = ctx.createLinearGradient(0, 0, 0, b.len);
-    g.addColorStop(0,  c + '0)');
-    g.addColorStop(.1, c + (a*.5) + ')');
-    g.addColorStop(.4, c + a + ')');
-    g.addColorStop(.6, c + a + ')');
-    g.addColorStop(.9, c + (a*.5) + ')');
-    g.addColorStop(1,  c + '0)');
-    ctx.fillStyle = g;
-    ctx.fillRect(-b.w/2, 0, b.w, b.len);
-    ctx.restore();
-  }
-
-  function drawFrame(advance){
+  function draw(advance){
     ctx.clearRect(0, 0, W, H);
-    for(var i=0;i<beams.length;i++){
-      var b = beams[i];
-      if(advance){
-        b.y -= b.speed;
-        b.pulse += b.pulseSpeed;
-        if(b.y + b.len < -100) resetBeam(b, i);
+    if(!pts.length) return;
+    var i, j, a, b;
+
+    if(advance){
+      for(i=0;i<pts.length;i++){
+        a = pts[i];
+        a.x += a.vx; a.y += a.vy;
+        if(a.x < 0){ a.x = 0; a.vx = -a.vx; }
+        else if(a.x > W){ a.x = W; a.vx = -a.vx; }
+        if(a.y < 0){ a.y = 0; a.vy = -a.vy; }
+        else if(a.y > H){ a.y = H; a.vy = -a.vy; }
+        a.tw += a.tws;
       }
-      drawBeam(b);
+    }
+
+    var maxD = CFG.length, maxD2 = maxD*maxD;
+    var base = 'hsla(' + hue + ',' + CFG.saturation + '%,' + CFG.brightness + '%,';
+    ctx.lineWidth = CFG.strokeWidth;
+    for(i=0;i<pts.length;i++){
+      a = pts[i];
+      for(j=i+1;j<pts.length;j++){
+        b = pts[j];
+        var dx = a.x-b.x, dy = a.y-b.y, d2 = dx*dx + dy*dy;
+        if(d2 > maxD2) continue;
+        var t = 1 - Math.sqrt(d2)/maxD;
+        ctx.strokeStyle = base + (t*t*CFG.opacity*.7).toFixed(3) + ')';
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.stroke();
+      }
+    }
+
+    for(i=0;i<pts.length;i++){
+      a = pts[i];
+      ctx.fillStyle = base + (CFG.opacity*(.5 + Math.sin(a.tw)*.5*.6)).toFixed(3) + ')';
+      ctx.beginPath();
+      ctx.arc(a.x, a.y, a.r, 0, Math.PI*2);
+      ctx.fill();
     }
   }
 
   function frame(){
-    drawFrame(true);
+    draw(true);
     raf = requestAnimationFrame(frame);
   }
-
   function start(){
-    if(running || reduce.matches || document.hidden) return;
+    if(running || reduce.matches || document.hidden || !visible) return;
     running = true;
     raf = requestAnimationFrame(frame);
   }
@@ -1173,25 +1144,36 @@
     if(raf){ cancelAnimationFrame(raf); raf = 0; }
   }
 
-  var resizeTimer;
-  window.addEventListener('resize', function(){
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(resize, 150);
-  });
+  var accent = getComputedStyle(document.documentElement).getPropertyValue('--accent');
+  if(accent) hue = hexToHsl(accent);
+
+  // Pauses whenever the hero is off-route or scrolled away.
+  if('IntersectionObserver' in window){
+    new IntersectionObserver(function(entries){
+      visible = entries[0].isIntersecting;
+      if(visible){ if(!W) resize(); start(); } else stop();
+    }, { threshold:0 }).observe(canvas);
+  }else{
+    visible = true;
+  }
+
+  if('ResizeObserver' in window){
+    new ResizeObserver(resize).observe(canvas);
+  }else{
+    var t; window.addEventListener('resize', function(){
+      clearTimeout(t); t = setTimeout(resize, 150);
+    });
+  }
+
   document.addEventListener('visibilitychange', function(){
     if(document.hidden) stop(); else start();
   });
-  new MutationObserver(readPalette).observe(document.documentElement, {
-    attributes:true, attributeFilter:['data-theme']
-  });
-  darkQuery.addEventListener('change', readPalette);
   reduce.addEventListener('change', function(){
-    if(reduce.matches){ stop(); drawFrame(false); } else start();
+    if(reduce.matches){ stop(); draw(false); } else start();
   });
 
   resize();
-  readPalette();
-  if(reduce.matches) drawFrame(false); else start();
+  if(reduce.matches) draw(false); else start();
 })();
 </script>
 </body>
