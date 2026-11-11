@@ -777,6 +777,221 @@
     .skills-grid{ grid-template-columns:1fr; }
     .skill-card.is-lead{ grid-column:span 1; }
   }
+
+  /* =========================================================
+     MOTION LAYER — shared by every tab
+     ========================================================= */
+  :root{ --ease-out:cubic-bezier(.22,1,.36,1); }
+
+  /* ambient glow that trails the cursor behind page content */
+  .cursor-glow{
+    position:fixed; top:0; left:0; z-index:0;
+    width:44rem; height:44rem; margin:-22rem 0 0 -22rem;
+    border-radius:50%;
+    background:radial-gradient(closest-side, color-mix(in srgb, var(--accent) 9%, transparent), transparent 70%);
+    pointer-events:none;
+    opacity:0;
+    transition:opacity .6s ease;
+    will-change:transform;
+  }
+  .cursor-glow.on{ opacity:1; }
+
+  /* scroll progress under the header; sweeps once on every tab change */
+  .scroll-progress{
+    position:absolute; left:0; right:0; bottom:-1px; height:2px;
+    background:linear-gradient(90deg, var(--accent), #7c5cbf, var(--stamp));
+    transform:scaleX(var(--p, 0)); transform-origin:left;
+    pointer-events:none;
+  }
+  .scroll-progress.sweep{ animation:routeSweep .75s var(--ease-out); }
+  @keyframes routeSweep{
+    from{ transform:scaleX(0); opacity:1; }
+    60%{ transform:scaleX(1); opacity:1; }
+    to{ transform:scaleX(1); opacity:0; }
+  }
+
+  /* sliding nav indicator (desktop) */
+  .nav-ink{
+    position:absolute; left:0; bottom:-.78rem;
+    height:2px; width:0;
+    background:var(--accent);
+    box-shadow:0 0 12px color-mix(in srgb, var(--accent) 70%, transparent);
+    pointer-events:none;
+  }
+  .nav-ink.ready{ transition:transform .5s var(--ease-out), width .5s var(--ease-out); }
+  @media (min-width: 721px){
+    nav.primary-nav{ position:relative; }
+    nav.primary-nav.has-ink a[aria-current="page"]::after{ transform:scaleX(0); }
+  }
+  @media (max-width: 720px){ .nav-ink{ display:none; } }
+
+  /* generic reveal — fill-mode backwards so hover transforms still work after */
+  .js .rv{ opacity:0; }
+  .js .rv.is-in{ opacity:1; animation:rvUp .8s var(--ease-out) backwards; animation-delay:var(--rv-d, 0ms); }
+  .js .rv-pop.is-in{ animation-name:rvPop; animation-duration:.5s; }
+  .js .rv-right.is-in{ animation-name:rvRight; }
+  @keyframes rvUp{ from{ opacity:0; transform:translateY(22px); } to{ opacity:1; transform:none; } }
+  @keyframes rvPop{ from{ opacity:0; transform:scale(.8) translateY(6px); } to{ opacity:1; transform:none; } }
+  @keyframes rvRight{ from{ opacity:0; transform:translateX(28px); } to{ opacity:1; transform:none; } }
+
+  /* page headings rise out of a mask; the rule underneath draws in */
+  .h-mask{ display:inline-block; overflow:hidden; vertical-align:bottom; padding-bottom:.14em; margin-bottom:-.14em; }
+  .h-mask > span{ display:inline-block; }
+  .js .page-head:not(.is-in) .h-mask > span{ transform:translateY(115%); }
+  .js .page-head.is-in .h-mask > span{ animation:hRise .95s var(--ease-out) .05s backwards; }
+  @keyframes hRise{ from{ transform:translateY(115%); } to{ transform:none; } }
+  .js .page-head{ position:relative; border-bottom-color:transparent; }
+  .js .page-head::after{
+    content:""; position:absolute; left:0; right:0; bottom:-1px; height:1px;
+    background:linear-gradient(90deg, var(--accent), var(--border) 35%);
+    transform:scaleX(0); transform-origin:left;
+  }
+  .js .page-head.is-in::after{ transform:scaleX(1); transition:transform 1.3s var(--ease-out) .2s; }
+
+  /* home: typed role line */
+  .type-caret{
+    display:inline-block; width:.55em; height:1.1em;
+    margin-left:.15em; vertical-align:-.18em;
+    background:var(--accent);
+    animation:caretBlink 1s steps(1) infinite;
+  }
+  @keyframes caretBlink{ 50%{ opacity:0; } }
+
+  /* "Present" badges pulse like a live signal */
+  .live{ display:inline-flex; align-items:center; gap:.4rem; color:var(--accent); }
+  .live::before{
+    content:""; width:.42rem; height:.42rem; border-radius:50%;
+    background:var(--accent);
+    box-shadow:0 0 0 0 color-mix(in srgb, var(--accent) 55%, transparent);
+    animation:statusPulse 2.6s ease-out infinite;
+  }
+
+  /* experience: a timeline rail that fills as you scroll */
+  .ledger{ position:relative; --rail-x:calc(9.5rem + var(--space-3) / 2); --node-top:calc(var(--space-3) + .3rem); }
+  .ledger::before, .ledger::after{
+    content:""; position:absolute; top:.6rem; bottom:0;
+    left:var(--rail-x); width:1px; margin-left:-.5px;
+  }
+  .ledger::before{ background:var(--border); }
+  .ledger::after{
+    background:linear-gradient(180deg, var(--accent), var(--stamp));
+    box-shadow:0 0 10px color-mix(in srgb, var(--accent) 55%, transparent);
+    transform:scaleY(var(--tl, 0)); transform-origin:top;
+    transition:transform .45s var(--ease-out);
+  }
+  .ledger-row{ position:relative; }
+  .ledger-row::before, .ledger-row::after{
+    content:""; position:absolute; z-index:1;
+    left:var(--rail-x); top:var(--node-top);
+    width:.72rem; height:.72rem; margin-left:-.36rem;
+    border-radius:50%; pointer-events:none;
+  }
+  .ledger-row:first-child{ --node-top:.3rem; }
+  .ledger-row::before{
+    background:var(--bg);
+    border:1.5px solid var(--border-strong);
+    transition:border-color .4s ease, background .4s ease, box-shadow .4s ease;
+  }
+  .ledger-row::after{ border:1px solid var(--accent); opacity:0; }
+  .ledger-row.reached::before{
+    border-color:var(--accent); background:var(--accent);
+    box-shadow:0 0 0 4px color-mix(in srgb, var(--accent) 22%, transparent);
+  }
+  .ledger-row.reached::after{ animation:nodePing 1.3s ease-out; }
+  @keyframes nodePing{ from{ opacity:.9; transform:scale(1); } to{ opacity:0; transform:scale(3.4); } }
+  @media (max-width: 720px){
+    .ledger{ --rail-x:.36rem; }
+    .ledger-row{ padding-left:1.6rem; }
+  }
+
+  /* work: a scanner beam reads each dossier, then the stamp lands */
+  .dossier .scan{ position:absolute; inset:0; overflow:hidden; border-radius:inherit; pointer-events:none; }
+  .dossier .scan::before{
+    content:""; position:absolute; left:0; right:0; top:0; height:40%;
+    background:linear-gradient(180deg, transparent, color-mix(in srgb, var(--accent) 9%, transparent) 85%, color-mix(in srgb, var(--accent) 75%, transparent) 100%);
+    transform:translateY(-100%); opacity:0;
+  }
+  .dossier.is-in .scan::before{ animation:scanDown 1.5s cubic-bezier(.45,.05,.35,1) .2s; }
+  @keyframes scanDown{
+    0%{ transform:translateY(-100%); opacity:1; }
+    85%{ opacity:1; }
+    100%{ transform:translateY(260%); opacity:0; }
+  }
+  .stamp{ --stamp-rot:-9deg; transform:rotate(var(--stamp-rot)); }
+  @media (max-width: 720px){ .stamp{ --stamp-rot:-6deg; } }
+  .js .dossier .stamp{ opacity:0; }
+  .js .dossier.is-in .stamp{ opacity:1; animation:stampSlam .55s cubic-bezier(.3,1.5,.5,1) .9s backwards; }
+  @keyframes stampSlam{
+    0%{ opacity:0; transform:rotate(calc(var(--stamp-rot) - 20deg)) scale(2.4); }
+    60%{ opacity:1; transform:rotate(calc(var(--stamp-rot) + 2deg)) scale(.92); }
+    100%{ opacity:1; transform:rotate(var(--stamp-rot)) scale(1); }
+  }
+
+  /* cursor spotlight on cards */
+  [data-spot]{ position:relative; }
+  [data-spot]::before{
+    content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+    background:radial-gradient(22rem circle at var(--mx, 50%) var(--my, 50%), color-mix(in srgb, var(--accent) 10%, transparent), transparent 60%);
+    opacity:0; transition:opacity .35s ease;
+  }
+  [data-spot]:hover::before{ opacity:1; }
+
+  /* skills: a small network pulses signals through the lead card */
+  .nn{
+    position:absolute; right:1.25rem; top:3.1rem;
+    width:9.5rem; height:5.2rem;
+    opacity:.75; pointer-events:none;
+  }
+  .skill-card.is-lead ul{ padding-right:11rem; }
+  .nn line{ stroke:var(--border-strong); stroke-width:1; }
+  .nn line.sig{
+    stroke:var(--accent); stroke-width:1.6; stroke-linecap:round;
+    stroke-dasharray:14 110; stroke-dashoffset:124;
+    animation:nnSig 2.6s cubic-bezier(.45,.05,.55,.95) infinite;
+    animation-delay:var(--d, 0s);
+  }
+  @keyframes nnSig{ from{ stroke-dashoffset:124; } to{ stroke-dashoffset:0; } }
+  .nn circle{
+    fill:var(--bg); stroke:var(--accent); stroke-width:1.2;
+    animation:nnNode 2.6s ease-in-out infinite;
+    animation-delay:var(--d, 0s);
+  }
+  @keyframes nnNode{ 50%{ fill:color-mix(in srgb, var(--accent) 65%, var(--bg)); } }
+  @media (max-width: 860px){
+    .nn{ display:none; }
+    .skill-card.is-lead ul{ padding-right:0; }
+  }
+
+  /* contact: live clock colon blinks */
+  .clock-sep{ animation:caretBlink 1s steps(1) infinite; }
+
+  /* pager arrows lean toward their destination */
+  .pager .dir{ transition:letter-spacing .35s var(--ease-out), color .2s ease; }
+  .pager a:hover .dir{ letter-spacing:.22em; color:var(--accent); }
+
+  /* magnetic buttons ride on `translate` so they compose with existing transforms */
+  [data-magnet]{ transition:translate .4s var(--ease-out); }
+
+  @media (prefers-reduced-motion: reduce){
+    .cursor-glow{ display:none; }
+    .scroll-progress.sweep{ animation:none; }
+    .nav-ink.ready{ transition:none; }
+    .js .rv{ opacity:1; }
+    .js .rv.is-in{ animation:none; }
+    .js .page-head:not(.is-in) .h-mask > span{ transform:none; }
+    .js .page-head.is-in .h-mask > span{ animation:none; }
+    .js .page-head::after{ transform:scaleX(1); transition:none; }
+    .type-caret, .clock-sep, .live::before{ animation:none; }
+    .ledger::after{ transform:scaleY(1); transition:none; }
+    .ledger-row.reached::after{ animation:none; }
+    .dossier .scan{ display:none; }
+    .js .dossier .stamp{ opacity:1; }
+    .js .dossier.is-in .stamp{ animation:none; }
+    [data-spot]::before{ display:none; }
+    .nn line.sig{ animation:none; stroke-dasharray:none; opacity:.35; }
+    .nn circle{ animation:none; }
+    [data-magnet]{ transition:none; }
+  }
 </style>
 </head>
 <body>
@@ -1380,6 +1595,14 @@
   var REF_CELLS = 96;
   var hue = 214;
 
+  // Points drift away from the cursor and wire themselves to it when it's near.
+  var REACH = 150;
+  var pointer = { x:-1e5, y:-1e5 };
+  if(matchMedia('(hover: hover) and (pointer: fine)').matches){
+    window.addEventListener('pointermove', function(e){ pointer.x = e.clientX; pointer.y = e.clientY; }, { passive:true });
+    document.addEventListener('pointerleave', function(){ pointer.x = pointer.y = -1e5; });
+  }
+
   function hexToHsl(hex){
     hex = hex.trim().replace('#','');
     if(hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
@@ -1452,6 +1675,11 @@
       if(!pts.length) return;
       var i, j, a, b;
 
+      // Cursor in canvas space; the canvas itself ignores pointer events.
+      var rect = canvas.getBoundingClientRect();
+      var cx = pointer.x - rect.left, cy = pointer.y - rect.top;
+      var near = advance && cx > -REACH && cx < W + REACH && cy > -REACH && cy < H + REACH;
+
       if(advance){
         for(i=0;i<pts.length;i++){
           a = pts[i];
@@ -1461,6 +1689,13 @@
           if(a.y < 0){ a.y = 0; a.vy = -a.vy; }
           else if(a.y > H){ a.y = H; a.vy = -a.vy; }
           a.tw += a.tws;
+          if(near){
+            var px = a.x - cx, py = a.y - cy, pd2 = px*px + py*py;
+            if(pd2 < REACH*REACH && pd2 > 1){
+              var pd = Math.sqrt(pd2), push = (1 - pd/REACH) * .9;
+              a.x += px/pd * push; a.y += py/pd * push;
+            }
+          }
         }
       }
 
@@ -1478,6 +1713,20 @@
           ctx.beginPath();
           ctx.moveTo(a.x, a.y);
           ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+        }
+      }
+
+      if(near){
+        for(i=0;i<pts.length;i++){
+          a = pts[i];
+          var qx = a.x - cx, qy = a.y - cy, q2 = qx*qx + qy*qy;
+          if(q2 > REACH*REACH*1.6) continue;
+          var qt = 1 - Math.sqrt(q2)/(REACH*1.27);
+          ctx.strokeStyle = base + (qt*qt*CFG.opacity).toFixed(3) + ')';
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(a.x, a.y);
           ctx.stroke();
         }
       }
@@ -1539,6 +1788,370 @@
       if(reduce.matches){ f.stop(); f.draw(false); } else f.start();
     });
   });
+})();
+</script>
+
+<script>
+/* ---------- motion layer: runs on every tab ---------- */
+(function(){
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var finePointer = matchMedia('(hover: hover) and (pointer: fine)').matches;
+  var $$ = function(sel, root){ return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
+  var activePage = function(){ return document.querySelector('.page.is-active') || document.getElementById('home'); };
+
+  /* -- one-off DOM decoration -- */
+
+  // Page headings rise out of a mask.
+  $$('.page-head h2').forEach(function(h){
+    var inner = document.createElement('span');
+    while(h.firstChild) inner.appendChild(h.firstChild);
+    var mask = document.createElement('span');
+    mask.className = 'h-mask';
+    mask.appendChild(inner);
+    h.appendChild(mask);
+  });
+
+  // "Present" becomes a live badge.
+  $$('.ledger-date, .dossier-date').forEach(function(el){
+    var t = el.textContent;
+    if(!/Present\s*$/.test(t)) return;
+    el.textContent = t.replace(/Present\s*$/, '');
+    var live = document.createElement('span');
+    live.className = 'live';
+    live.textContent = 'Present';
+    el.appendChild(live);
+  });
+
+  // Each dossier gets a scanner beam.
+  $$('.dossier').forEach(function(d){
+    var s = document.createElement('span');
+    s.className = 'scan';
+    s.setAttribute('aria-hidden', 'true');
+    d.insertBefore(s, d.firstChild);
+  });
+
+  $$('.dossier, .skill-card, a.contact-card').forEach(function(el){ el.setAttribute('data-spot', ''); });
+
+  // Lead skill card: small network with signals flowing left to right.
+  var lead = document.querySelector('.skill-card.is-lead');
+  if(lead){
+    var NS = 'http://www.w3.org/2000/svg';
+    var layers = [3, 4, 4, 2], W = 152, H = 84, nodes = [];
+    var svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('class', 'nn');
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    svg.setAttribute('aria-hidden', 'true');
+    layers.forEach(function(n, li){
+      var x = 8 + li * (W - 16) / (layers.length - 1);
+      nodes[li] = [];
+      for(var k = 0; k < n; k++) nodes[li].push([x, (k + 1) * H / (n + 1)]);
+    });
+    var gEdges = document.createElementNS(NS, 'g');
+    var gNodes = document.createElementNS(NS, 'g');
+    for(var li = 0; li < layers.length - 1; li++){
+      nodes[li].forEach(function(a, ai){
+        nodes[li + 1].forEach(function(b, bi){
+          var base = document.createElementNS(NS, 'line');
+          base.setAttribute('x1', a[0]); base.setAttribute('y1', a[1]);
+          base.setAttribute('x2', b[0]); base.setAttribute('y2', b[1]);
+          gEdges.appendChild(base);
+          // Roughly one edge in three carries a signal, timed by layer so pulses cascade.
+          if((ai + bi + li) % 3 === 0){
+            var sig = base.cloneNode();
+            sig.setAttribute('class', 'sig');
+            sig.setAttribute('pathLength', '100');
+            sig.style.setProperty('--d', (li * .55 + ai * .12) + 's');
+            gEdges.appendChild(sig);
+          }
+        });
+      });
+    }
+    nodes.forEach(function(layer, li){
+      layer.forEach(function(p, k){
+        var c = document.createElementNS(NS, 'circle');
+        c.setAttribute('cx', p[0]); c.setAttribute('cy', p[1]); c.setAttribute('r', 3.2);
+        c.style.setProperty('--d', (li * .55 + k * .1 + .3) + 's');
+        gNodes.appendChild(c);
+      });
+    });
+    svg.appendChild(gEdges); svg.appendChild(gNodes);
+    lead.appendChild(svg);
+  }
+
+  /* -- reveal on view; replays each time a tab is opened -- */
+
+  var targets = [];
+  function mark(el, cls, delay){
+    el.classList.add('rv');
+    if(cls) el.classList.add(cls);
+    el.style.setProperty('--rv-d', Math.round(delay) + 'ms');
+    targets.push(el);
+  }
+  function each(containerSel, childSel, cls, step, base){
+    $$(containerSel).forEach(function(c){
+      $$(childSel, c).forEach(function(el, i){ mark(el, cls, base + i * step); });
+    });
+  }
+
+  $$('.page-head').forEach(function(el){ targets.push(el); });   // observed only, drives the heading mask
+  each('.page-head', '.eyebrow, .page-sub', '', 120, 0);
+  each('.page-head', '.count', 'rv-pop', 0, 300);
+  each('.ledger-row', '.ledger-date, h3, .org-line', '', 90, 0);
+  each('.ledger-row', 'li', '', 70, 260);
+  $$('.dossier').forEach(function(d){
+    mark(d, '', 0);
+    $$('.stack-tags span', d).forEach(function(el, i){ mark(el, 'rv-pop', 280 + i * 55); });
+    $$('ul.bullets li', d).forEach(function(el, i){ mark(el, '', 380 + i * 60); });
+  });
+  $$('.skill-card').forEach(function(card, ci){
+    var cd = (ci % 3) * 90;
+    mark(card, '', cd);
+    $$('li', card).forEach(function(el, i){ mark(el, 'rv-pop', cd + 260 + i * 45); });
+  });
+  each('.contact-main', '.status-chip, .contact-lede, .cta-row, .contact-note', '', 100, 0);
+  each('.contact-channels', ':scope > li', 'rv-right', 120, 150);
+  $$('.pager').forEach(function(el){ mark(el, '', 0); });
+
+  var io = null;
+  if('IntersectionObserver' in window && !reduce){
+    io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(!e.isIntersecting) return;
+        e.target.classList.add('is-in');
+        io.unobserve(e.target);
+      });
+    }, { threshold:0, rootMargin:'0px 0px -7% 0px' });
+    targets.forEach(function(el){ io.observe(el); });
+  }else{
+    targets.forEach(function(el){ el.classList.add('is-in'); });
+  }
+
+  /* -- text effects -- */
+
+  var GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#/_*';
+  function textNodes(el){
+    var out = [], w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    while(w.nextNode()) out.push(w.currentNode);
+    return out;
+  }
+  // Mono labels decode from noise, left to right.
+  function scramble(el, delay){
+    if(reduce) return;
+    var nodes = textNodes(el);
+    nodes.forEach(function(n){ if(n._orig == null) n._orig = n.nodeValue; });
+    var total = nodes.reduce(function(s, n){ return s + n._orig.length; }, 0);
+    var dur = 650 + total * 12, start = 0;
+    cancelAnimationFrame(el._scr);
+    function tick(now){
+      if(!start) start = now + (delay || 0);
+      var p = Math.max(0, Math.min(1, (now - start) / dur));
+      var shown = Math.floor(p * total), g = 0;
+      nodes.forEach(function(n){
+        var s = '';
+        for(var i = 0; i < n._orig.length; i++, g++){
+          var ch = n._orig[i];
+          s += (g < shown || ch === ' ' || ch === '/') ? ch : GLYPHS[(Math.random() * GLYPHS.length) | 0];
+        }
+        n.nodeValue = s;
+      });
+      if(p < 1) el._scr = requestAnimationFrame(tick);
+    }
+    el._scr = requestAnimationFrame(tick);
+  }
+
+  // "02 entries" counts up from 00.
+  function countUp(el, delay){
+    if(el._orig == null) el._orig = el.textContent;
+    var m = el._orig.match(/^(\d+)(.*)$/);
+    if(!m || reduce) return;
+    var target = +m[1], width = m[1].length, rest = m[2], dur = 900, start = 0;
+    el.textContent = '0'.repeat(width) + rest;
+    cancelAnimationFrame(el._cnt);
+    function tick(now){
+      if(!start) start = now + (delay || 0);
+      var p = Math.max(0, Math.min(1, (now - start) / dur));
+      var eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = String(Math.round(target * eased)).padStart(width, '0') + rest;
+      if(p < 1) el._cnt = requestAnimationFrame(tick);
+    }
+    el._cnt = requestAnimationFrame(tick);
+  }
+
+  // Home role line types itself out once.
+  var roleLine = document.querySelector('.role-line');
+  if(roleLine && !reduce){
+    var roleText = roleLine.textContent;
+    roleLine.setAttribute('aria-label', roleText);
+    roleLine.textContent = '';
+    var typed = document.createElement('span');
+    typed.setAttribute('aria-hidden', 'true');
+    var caret = document.createElement('span');
+    caret.className = 'type-caret';
+    caret.setAttribute('aria-hidden', 'true');
+    var sr = document.createElement('span');
+    sr.className = 'sr-only';
+    sr.textContent = roleText;
+    roleLine.appendChild(sr); roleLine.appendChild(typed); roleLine.appendChild(caret);
+    var ci = 0;
+    setTimeout(function step(){
+      typed.textContent = roleText.slice(0, ++ci);
+      if(ci < roleText.length) setTimeout(step, 22 + Math.random() * 38);
+    }, 650);
+  }
+
+  /* -- experience timeline -- */
+
+  var ledger = document.querySelector('.ledger');
+  var ledgerRows = ledger ? $$('.ledger-row', ledger) : [];
+  function updateTimeline(){
+    if(!ledger || !ledger.offsetParent) return;
+    if(reduce){
+      ledger.style.setProperty('--tl', 1);
+      ledgerRows.forEach(function(r){ r.classList.add('reached'); });
+      return;
+    }
+    var r = ledger.getBoundingClientRect();
+    var line = innerHeight * .8;
+    var p = (line - r.top) / r.height;
+    var atBottom = innerHeight + scrollY >= document.documentElement.scrollHeight - 4;
+    if(atBottom) p = 1;
+    p = Math.max(0, Math.min(1, p));
+    ledger.style.setProperty('--tl', p.toFixed(3));
+    ledgerRows.forEach(function(row){
+      var nodeY = row.getBoundingClientRect().top + parseFloat(getComputedStyle(row, '::before').top || 0);
+      row.classList.toggle('reached', atBottom || nodeY < r.top + p * r.height + 2);
+    });
+  }
+
+  /* -- header: scroll progress + sliding nav ink -- */
+
+  var header = document.querySelector('.site-header');
+  var bar = document.createElement('span');
+  bar.className = 'scroll-progress';
+  bar.setAttribute('aria-hidden', 'true');
+  header.appendChild(bar);
+
+  var nav = document.getElementById('primaryNav');
+  var ink = document.createElement('span');
+  ink.className = 'nav-ink';
+  ink.setAttribute('aria-hidden', 'true');
+  nav.appendChild(ink);
+  nav.classList.add('has-ink');
+  function moveInk(){
+    var cur = nav.querySelector('a[aria-current="page"]');
+    if(!cur) return;
+    ink.style.width = cur.offsetWidth + 'px';
+    ink.style.transform = 'translateX(' + cur.offsetLeft + 'px)';
+  }
+
+  var ticking = false;
+  function onScroll(){
+    if(ticking) return;
+    ticking = true;
+    requestAnimationFrame(function(){
+      ticking = false;
+      var max = document.documentElement.scrollHeight - innerHeight;
+      bar.style.setProperty('--p', max > 0 ? (scrollY / max).toFixed(4) : 0);
+      updateTimeline();
+    });
+  }
+  addEventListener('scroll', onScroll, { passive:true });
+  addEventListener('resize', function(){ moveInk(); onScroll(); });
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(moveInk);
+
+  /* -- contact: live Amman clock -- */
+
+  var locAside = $$('.contact-card.is-static .cc-aside')[0];
+  if(locAside && window.Intl){
+    try{
+      var fmt = new Intl.DateTimeFormat('en-GB', { timeZone:'Asia/Amman', hour:'2-digit', minute:'2-digit', hour12:false });
+      var renderClock = function(){
+        var parts = fmt.format(new Date()).split(':');
+        locAside.innerHTML = 'GMT+3 &middot; ' + parts[0] + '<span class="clock-sep">:</span>' + parts[1];
+      };
+      renderClock();
+      setInterval(renderClock, 15000);
+    }catch(e){}
+  }
+
+  /* -- pointer-driven effects (fine pointers only) -- */
+
+  if(finePointer && !reduce){
+    // Card spotlight.
+    document.addEventListener('pointermove', function(e){
+      var t = e.target.closest && e.target.closest('[data-spot]');
+      if(!t) return;
+      var r = t.getBoundingClientRect();
+      t.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+      t.style.setProperty('--my', (e.clientY - r.top) + 'px');
+    }, { passive:true });
+
+    // Ambient glow eases toward the cursor and sleeps once it catches up.
+    var glow = document.createElement('div');
+    glow.className = 'cursor-glow';
+    glow.setAttribute('aria-hidden', 'true');
+    document.body.insertBefore(glow, document.body.firstChild);
+    var gx = innerWidth / 2, gy = innerHeight / 3, tx = gx, ty = gy, gRaf = 0;
+    function glowStep(){
+      gx += (tx - gx) * .12; gy += (ty - gy) * .12;
+      glow.style.transform = 'translate3d(' + gx.toFixed(1) + 'px,' + gy.toFixed(1) + 'px,0)';
+      gRaf = (Math.abs(tx - gx) + Math.abs(ty - gy) > .5) ? requestAnimationFrame(glowStep) : 0;
+    }
+    addEventListener('pointermove', function(e){
+      tx = e.clientX; ty = e.clientY;
+      glow.classList.add('on');
+      if(!gRaf) gRaf = requestAnimationFrame(glowStep);
+    }, { passive:true });
+    document.addEventListener('pointerleave', function(){ glow.classList.remove('on'); });
+
+    // Primary buttons lean toward the cursor.
+    $$('.arrow-fill-btn, .btn-glow-wrap').forEach(function(el){
+      el.setAttribute('data-magnet', '');
+      el.addEventListener('pointermove', function(e){
+        var r = el.getBoundingClientRect();
+        var dx = (e.clientX - (r.left + r.width / 2)) * .22;
+        var dy = (e.clientY - (r.top + r.height / 2)) * .35;
+        el.style.translate = dx.toFixed(1) + 'px ' + dy.toFixed(1) + 'px';
+      });
+      el.addEventListener('pointerleave', function(){ el.style.translate = ''; });
+    });
+  }
+
+  /* -- per-tab kick-off -- */
+
+  var firstRoute = true;
+  function onRoute(){
+    var page = activePage();
+
+    // Re-arm everything on the tabs we just left (they're display:none now, so no flash).
+    targets.forEach(function(el){
+      if(page.contains(el) || !el.classList.contains('is-in') || !io) return;
+      el.classList.remove('is-in');
+      io.observe(el);
+    });
+    if(ledger && !page.contains(ledger)){
+      ledger.style.setProperty('--tl', 0);
+      ledgerRows.forEach(function(r){ r.classList.remove('reached'); });
+    }
+
+    $$('.eyebrow', page).forEach(function(el, i){ scramble(el, i * 120); });
+    $$('.page-head .count, .sk-count', page).forEach(function(el, i){ countUp(el, 250 + i * 60); });
+
+    moveInk();
+    requestAnimationFrame(function(){ ink.classList.add('ready'); });
+
+    if(!firstRoute && !reduce){
+      bar.classList.remove('sweep');
+      void bar.offsetWidth;
+      bar.classList.add('sweep');
+    }
+    firstRoute = false;
+
+    // Let the page lay out before measuring the timeline.
+    requestAnimationFrame(function(){ requestAnimationFrame(onScroll); });
+  }
+  addEventListener('hashchange', onRoute);
+  onRoute();
 })();
 </script>
 </body>
